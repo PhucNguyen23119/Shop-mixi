@@ -1,0 +1,776 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="breadcrumb">
+    <a href="/" class="breadcrumb-home">Trang chủ</a>
+    <span class="breadcrumb-separator">></span>
+    <span class="breadcrumb-current">Đăng ký tài khoản</span>
+</div>
+
+{% if error_message %}
+<div class="toast-error" id="toastError">
+    {{ error_message }}
+</div>
+{% endif %}
+
+<div class="signup-wrapper">
+
+  <form class="signup-card" method="POST" enctype="multipart/form-data" id="signupForm">
+
+    <div class="signup-header">
+      <h1>Đăng ký tài khoản</h1>
+      <p>Vui lòng điền thông tin bên dưới để tạo tài khoản của bạn</p>
+    </div>
+
+    <div class="signup-line"></div>
+
+    <div class="signup-body">
+
+      <div class="signup-left">
+
+        <div class="signup-row">
+          <label>Họ và tên</label>
+          <input
+            type="text"
+            id="fullName"
+            name="full_name"
+            value="{{ form_data.full_name if form_data else '' }}"
+            placeholder="Nhập họ và tên"
+             tabindex="1">
+        </div>
+
+        <div class="signup-row">
+          <label>Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value="{{ form_data.email if form_data else '' }}"
+            placeholder="email@example.com"
+            tabindex="2">
+        </div>
+
+        <div class="signup-row">
+          <label>Số điện thoại</label>
+          <input
+            type="text"
+            id="phone"
+            name="phone"
+            value="{{ form_data.phone if form_data else '' }}"
+            placeholder="032xxxxxxx"
+            tabindex="3">
+        </div>
+
+        <div class="signup-row gender-row">
+          <label>Giới tính</label>
+
+          <div class="gender-options">
+            <label>
+              <input
+                type="radio"
+                name="gender"
+                value="Nam"
+                tabindex="4"
+                {% if not form_data or form_data.gender == "Nam" %}checked{% endif %}>
+              Nam
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                name="gender"
+                value="Nữ"
+                tabindex="5"
+                {% if form_data and form_data.gender == "Nữ" %}checked{% endif %}>
+              Nữ
+            </label>
+          </div>
+        </div>
+
+        <div class="signup-row">
+          <label>Ngày sinh</label>
+
+          <div class="date-box">
+            <input
+              type="date"
+              id="birthDate"
+              name="date_of_birth"
+              value="{{ form_data.date_of_birth if form_data else '' }}"
+              class="birth-date"
+              min="1900-01-01"
+              tabindex="6">
+          </div>
+        </div>
+
+        <div class="signup-row">
+  <label>Mật khẩu</label>
+
+  <div class="signup-password-box">
+    <input
+      type="password"
+      id="passwordSignup"
+      name="password"
+      value="{{ form_data.password if form_data else '' }}"
+      placeholder="Nhập mật khẩu"
+      tabindex="7">
+
+    <img
+      id="toggleSignupPassword"
+      src="{{ url_for('static', filename='img/hide-eye.png') }}"
+      class="signup-eye-icon"
+      role="button"
+      tabindex="8">
+  </div>
+</div>
+
+        <div class="signup-agree">
+          <input
+            type="checkbox"
+            id="agreeTerms"
+            name="agree_terms"
+            value="1"
+            tabindex="9"
+            {% if form_data and form_data.agree_terms %}checked{% endif %}>
+        
+          <span>
+            Tôi đồng ý với
+            <a href="#">Điều khoản dịch vụ</a>
+            và
+            <a href="#">Chính sách bảo mật</a>
+            của Technova.
+          </span>
+        </div>
+
+      </div>
+
+      <div class="signup-divider"></div>
+
+      <div class="signup-right">
+        <img
+          src="{{ url_for('static', filename='img/user.png') }}"
+          class="signup-avatar"
+          id="avatarPreview">
+
+        <input
+    type="file"
+    id="avatarOriginalInput"
+    name="avatar_original"
+    accept=".png,.jpg,.jpeg"
+    hidden>
+
+<input
+    type="file"
+    id="avatarInput"
+    name="avatar"
+    accept=".png,.jpg,.jpeg"
+    hidden>
+
+        <button type="button" class="choose-img-btn" id="chooseAvatarBtn" tabindex="10">
+          Chọn Ảnh
+        </button>
+
+        <p>Định dạng: JPEG, PNG</p>
+      </div>
+
+    </div>
+
+    <div class="signup-line bottom"></div>
+
+    <button type="submit" class="signup-submit" tabindex="11">Đăng ký</button>
+
+    <div class="signup-login">
+      Bạn đã có tài khoản?
+      <a href="/signin">Đăng nhập ngay</a>
+    </div>
+
+  </form>
+
+</div>
+
+<div class="avatar-crop-overlay" id="avatarCropOverlay">
+    <div class="avatar-crop-box">
+        <h3>Căn chỉnh ảnh đại diện</h3>
+
+        <div class="avatar-crop-area" id="avatarCropArea">
+            <img id="cropImage">
+        </div>
+
+        <p>Kéo ảnh để chọn vùng hiển thị</p>
+
+        <div class="avatar-crop-actions">
+            <button type="button" id="cancelCropBtn">Hủy</button>
+            <button type="button" id="saveCropBtn">Lưu ảnh</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const chooseBtn = document.getElementById("chooseAvatarBtn");
+    const avatarOriginalInput = document.getElementById("avatarOriginalInput");
+    const avatarInput = document.getElementById("avatarInput");
+    const avatarPreview = document.getElementById("avatarPreview");
+
+    const overlay = document.getElementById("avatarCropOverlay");
+    const cropImage = document.getElementById("cropImage");
+    const cropArea = document.getElementById("avatarCropArea");
+    const cancelBtn = document.getElementById("cancelCropBtn");
+    const saveBtn = document.getElementById("saveCropBtn");
+
+    const boxSize = 220;
+    const outputSize = 300;
+
+
+    
+    let originalImageData = "";
+    let fileName = "avatar.jpg";
+    let hasAvatar = false;
+
+    let posX = 0;
+    let posY = 0;
+    let startX = 0;
+    let startY = 0;
+    let isDragging = false;
+
+    let baseScale = 1;
+    let zoom = 1.25;
+    let imgWidth = 0;
+    let imgHeight = 0;
+
+    let savedZoom = 1.25;
+    let savedPosX = 0;
+    let savedPosY = 0;
+    let hasSavedCrop = false;
+
+    chooseBtn.addEventListener("click", () => {
+    avatarOriginalInput.click();
+});
+
+avatarOriginalInput.addEventListener("change", () => {
+        const file = avatarOriginalInput.files[0];
+        if (!file) return;
+
+        fileName = file.name || "avatar.jpg";
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            originalImageData = reader.result;
+            hasAvatar = true;
+            hasSavedCrop = false;
+
+            avatarPreview.src = originalImageData;
+
+            openCropOverlay(true);
+        };
+
+        reader.readAsDataURL(file);
+    });
+
+    avatarPreview.addEventListener("click", () => {
+        if (!hasAvatar || !originalImageData) {
+            avatarOriginalInput.click();
+            return;
+        }
+
+        openCropOverlay(false);
+    });
+
+    function openCropOverlay(resetCrop = false) {
+        cropImage.onload = () => {
+            baseScale = Math.max(
+                boxSize / cropImage.naturalWidth,
+                boxSize / cropImage.naturalHeight
+            );
+
+            if (resetCrop || !hasSavedCrop) {
+                resetCropPosition();
+            } else {
+                zoom = savedZoom;
+                posX = savedPosX;
+                posY = savedPosY;
+            }
+
+            updateCropImage();
+            overlay.style.display = "flex";
+        };
+
+        cropImage.src = "";
+        cropImage.src = originalImageData;
+    }
+
+    function resetCropPosition() {
+        zoom = 1.25;
+
+        imgWidth = cropImage.naturalWidth * baseScale * zoom;
+        imgHeight = cropImage.naturalHeight * baseScale * zoom;
+
+        posX = (boxSize - imgWidth) / 2;
+        posY = (boxSize - imgHeight) / 2;
+    }
+
+    function updateCropImage() {
+        imgWidth = cropImage.naturalWidth * baseScale * zoom;
+        imgHeight = cropImage.naturalHeight * baseScale * zoom;
+
+        limitPosition();
+
+        cropImage.style.width = imgWidth + "px";
+        cropImage.style.height = imgHeight + "px";
+        cropImage.style.left = posX + "px";
+        cropImage.style.top = posY + "px";
+    }
+
+    function limitPosition() {
+        if (imgWidth <= boxSize) {
+            posX = (boxSize - imgWidth) / 2;
+        } else {
+            if (posX > 0) posX = 0;
+            if (posX < boxSize - imgWidth) posX = boxSize - imgWidth;
+        }
+
+        if (imgHeight <= boxSize) {
+            posY = (boxSize - imgHeight) / 2;
+        } else {
+            if (posY > 0) posY = 0;
+            if (posY < boxSize - imgHeight) posY = boxSize - imgHeight;
+        }
+    }
+
+    cropArea.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        startX = e.clientX - posX;
+        startY = e.clientY - posY;
+        cropArea.style.cursor = "grabbing";
+    });
+
+    document.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+
+        posX = e.clientX - startX;
+        posY = e.clientY - startY;
+
+        updateCropImage();
+    });
+
+    document.addEventListener("mouseup", () => {
+        isDragging = false;
+        cropArea.style.cursor = "grab";
+    });
+
+    cropArea.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        zoomImage(e.deltaY < 0 ? 0.1 : -0.1);
+    });
+
+    document.addEventListener("keydown", (e) => {
+    if (overlay.style.display !== "flex") return;
+
+    if (e.key === "+" || e.key === "=") {
+        e.preventDefault();
+        zoomImage(0.1);
+    }
+
+    if (e.key === "-" || e.key === "_") {
+        e.preventDefault();
+        zoomImage(-0.1);
+    }
+});
+
+    function zoomImage(amount) {
+        const oldWidth = imgWidth;
+        const oldHeight = imgHeight;
+
+        zoom += amount;
+
+        if (zoom < 1) zoom = 1;
+        if (zoom > 3) zoom = 3;
+
+        const newWidth = cropImage.naturalWidth * baseScale * zoom;
+        const newHeight = cropImage.naturalHeight * baseScale * zoom;
+
+        posX -= (newWidth - oldWidth) / 2;
+        posY -= (newHeight - oldHeight) / 2;
+
+        updateCropImage();
+    }
+
+    cancelBtn.addEventListener("click", () => {
+        overlay.style.display = "none";
+    });
+
+    saveBtn.addEventListener("click", () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = outputSize;
+        canvas.height = outputSize;
+
+        const ctx = canvas.getContext("2d");
+        const finalScale = baseScale * zoom;
+
+        ctx.drawImage(
+            cropImage,
+            -posX / finalScale,
+            -posY / finalScale,
+            boxSize / finalScale,
+            boxSize / finalScale,
+            0,
+            0,
+            outputSize,
+            outputSize
+        );
+
+        canvas.toBlob((blob) => {
+            const croppedFile = new File([blob], fileName, {
+                type: "image/jpeg"
+            });
+
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(croppedFile);
+            avatarInput.files = dataTransfer.files;
+
+            savedZoom = zoom;
+            savedPosX = posX;
+            savedPosY = posY;
+            hasSavedCrop = true;
+
+            avatarPreview.src = URL.createObjectURL(blob);
+            avatarPreview.style.objectFit = "cover";
+            avatarPreview.style.objectPosition = "center";
+
+            overlay.style.display = "none";
+        }, "image/jpeg", 0.9);
+    });
+
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const toast = document.getElementById("toastError");
+
+    if (toast) {
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            toast.style.transform = "translateX(30px)";
+            toast.style.transition = "0.3s";
+
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, 3000);
+    }
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("signupForm");
+
+    const fullName = document.getElementById("fullName");
+    const email = document.getElementById("email");
+    const phone = document.getElementById("phone");
+    const birthDate = document.getElementById("birthDate");
+    const password = document.getElementById("passwordSignup");
+    const agreeTerms = document.getElementById("agreeTerms");
+
+    function showFieldError(input, message) {
+        document.querySelectorAll(".field-error-bubble").forEach(item => item.remove());
+        document.querySelectorAll(".input-error").forEach(item => item.classList.remove("input-error"));
+
+        const bubble = document.createElement("div");
+        bubble.className = "field-error-bubble";
+        bubble.innerHTML = `<span>ⓘ</span> ${message}`;
+
+        const parent = input.closest(".signup-row") || input.closest(".signup-agree");
+        parent.style.position = "relative";
+        parent.appendChild(bubble);
+
+        input.classList.add("input-error");
+
+        setTimeout(() => {
+            bubble.classList.add("hide");
+
+            setTimeout(() => {
+                bubble.remove();
+                input.classList.remove("input-error");
+            }, 300);
+        }, 3000);
+    }
+
+    form.addEventListener("submit", (e) => {
+        if (!fullName.value.trim()) {
+            e.preventDefault();
+            showFieldError(fullName, "Họ và tên không được để trống.");
+            fullName.focus();
+            return;
+        }
+
+        if (!email.value.trim()) {
+            e.preventDefault();
+            showFieldError(email, "Email không được để trống.");
+            email.focus();
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.value.trim())) {
+            e.preventDefault();
+            showFieldError(email, "Email không hợp lệ, vui lòng nhập lại.");
+            email.focus();
+            return;
+        }
+
+        if (!phone.value.trim()) {
+            e.preventDefault();
+            showFieldError(phone, "Số điện thoại không được để trống.");
+            phone.focus();
+            return;
+        }
+
+        if (!phone.value.trim()) {
+            e.preventDefault();
+            showFieldError(phone, "Số điện thoại không được để trống.");
+            phone.focus();
+            return;
+        }
+
+        const phoneRegex = /^0[0-9]{9}$/;
+        if (!phoneRegex.test(phone.value.trim())) {
+            e.preventDefault();
+            showFieldError(phone, "Số điện thoại phải gồm 10 số và bắt đầu bằng 0.");
+            phone.focus();
+            return;
+        }
+
+        if (!birthDate.value) {
+            e.preventDefault();
+            showFieldError(birthDate, "Ngày sinh không được để trống.");
+            birthDate.focus();
+            return;
+        }
+
+        if (!password.value.trim()) {
+            e.preventDefault();
+            showFieldError(password, "Mật khẩu không được để trống.");
+            password.focus();
+            return;
+        }
+
+        if (password.value.trim().length < 8) {
+            e.preventDefault();
+            showFieldError(password, "Mật khẩu phải bao gồm ít nhất 8 ký tự.");
+            password.focus();
+            return;
+        }
+
+        if (!agreeTerms.checked) {
+            e.preventDefault();
+            showFieldError(agreeTerms, "Bạn cần đồng ý với điều khoản trước khi đăng ký.");
+            agreeTerms.focus();
+            return;
+        }
+    });
+});
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const passwordSignup = document.getElementById("passwordSignup");
+    const toggleSignupPassword = document.getElementById("toggleSignupPassword");
+
+    function togglePasswordSignup() {
+        if (!passwordSignup || !toggleSignupPassword) return;
+
+        if (passwordSignup.type === "password") {
+            passwordSignup.type = "text";
+            toggleSignupPassword.src =
+                "{{ url_for('static', filename='img/view-eye.png') }}";
+        } else {
+            passwordSignup.type = "password";
+            toggleSignupPassword.src =
+                "{{ url_for('static', filename='img/hide-eye.png') }}";
+        }
+    }
+
+    if (passwordSignup && toggleSignupPassword) {
+        toggleSignupPassword.addEventListener("click", togglePasswordSignup);
+
+        toggleSignupPassword.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.stopPropagation();
+                togglePasswordSignup();
+            }
+        });
+    }
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const signupForm = document.getElementById("signupForm");
+
+    const fullName = document.getElementById("fullName");
+    const email = document.getElementById("email");
+    const phone = document.getElementById("phone");
+
+    const genderNam = document.querySelector('input[name="gender"][value="Nam"]');
+    const genderNu = document.querySelector('input[name="gender"][value="Nữ"]');
+
+    const birthDate = document.getElementById("birthDate");
+    const passwordSignup = document.getElementById("passwordSignup");
+    const toggleSignupPassword = document.getElementById("toggleSignupPassword");
+    const agreeTerms = document.getElementById("agreeTerms");
+
+    const chooseAvatarBtn = document.getElementById("chooseAvatarBtn");
+    const signupSubmit = document.querySelector(".signup-submit");
+    const signupLoginLink = document.querySelector(".signup-login a");
+
+    const avatarOverlay = document.getElementById("avatarCropOverlay");
+    const saveCropBtn = document.getElementById("saveCropBtn");
+    const cancelCropBtn = document.getElementById("cancelCropBtn");
+
+    const normalTabOrder = [
+        fullName,
+        email,
+        phone,
+        genderNam,
+        genderNu,
+        birthDate,
+        passwordSignup,
+        toggleSignupPassword,
+        agreeTerms,
+        chooseAvatarBtn,
+        signupSubmit,
+        signupLoginLink
+    ].filter(Boolean);
+
+    const cropTabOrder = [
+        cancelCropBtn,
+        saveCropBtn
+    ].filter(Boolean);
+
+    function isOpen(overlay) {
+        return overlay && window.getComputedStyle(overlay).display !== "none";
+    }
+
+    function moveFocus(e, order) {
+        if (!order.length) return;
+
+        e.preventDefault();
+
+        const activeElement = document.activeElement;
+        let currentIndex = order.indexOf(activeElement);
+
+        if (currentIndex === -1) {
+            order[0].focus();
+            return;
+        }
+
+        let nextIndex;
+
+        if (e.shiftKey) {
+            nextIndex = currentIndex - 1;
+
+            if (nextIndex < 0) {
+                nextIndex = order.length - 1;
+            }
+        } else {
+            nextIndex = currentIndex + 1;
+
+            if (nextIndex >= order.length) {
+                nextIndex = 0;
+            }
+        }
+
+        order[nextIndex].focus();
+    }
+
+    window.addEventListener("keydown", (e) => {
+        const activeElement = document.activeElement;
+
+        if (!activeElement) return;
+
+        if (e.key === "Tab") {
+            if (isOpen(avatarOverlay)) {
+                moveFocus(e, cropTabOrder);
+                return;
+            }
+
+            moveFocus(e, normalTabOrder);
+            return;
+        }
+
+        if (e.key !== "Enter" && e.key !== " ") return;
+
+        if (activeElement.tagName === "TEXTAREA") {
+            return;
+        }
+
+        if (isOpen(avatarOverlay)) {
+            if (activeElement === cancelCropBtn || activeElement === saveCropBtn) {
+                e.preventDefault();
+                activeElement.click();
+                return;
+            }
+
+            if (e.key === "Enter") {
+                e.preventDefault();
+
+                if (saveCropBtn && !saveCropBtn.disabled) {
+                    saveCropBtn.click();
+                }
+            }
+
+            return;
+        }
+
+        if (activeElement === toggleSignupPassword) {
+            e.preventDefault();
+            e.stopPropagation();
+            activeElement.click();
+            return;
+        }
+
+        if (
+            activeElement.type === "radio" ||
+            activeElement.type === "checkbox"
+        ) {
+            e.preventDefault();
+            activeElement.click();
+            return;
+        }
+
+        if (activeElement === chooseAvatarBtn) {
+            e.preventDefault();
+            chooseAvatarBtn.click();
+            return;
+        }
+
+        if (activeElement.tagName === "A") {
+            return;
+        }
+
+        if (activeElement.tagName === "BUTTON") {
+            e.preventDefault();
+            activeElement.click();
+            return;
+        }
+
+        if (e.key === " ") {
+            return;
+        }
+
+        e.preventDefault();
+
+        if (signupForm) {
+            signupForm.requestSubmit();
+        }
+    }, true);
+});
+</script>
+
+{% endblock %}

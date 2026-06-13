@@ -1,0 +1,1113 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="breadcrumb">
+    <a href="/" class="breadcrumb-home">Trang chủ</a>
+    <span class="breadcrumb-separator">></span>
+    <span class="breadcrumb-current">Quản lý tài khoản</span>
+</div>
+
+<div class="infor-wrapper">
+
+    <form class="infor-card" method="POST" enctype="multipart/form-data">
+
+        <input type="hidden" id="emailHiddenInput" name="email" value="{{ email }}">
+        <input type="hidden" id="phoneHiddenInput" name="phone" value="{{ phone }}">
+        <input type="hidden" id="birthHiddenInput" name="date_of_birth" value="{{ date_of_birth or '' }}">
+
+        <div class="infor-header">
+            <h1>Thông tin của tôi</h1>
+            <p>Quản lý thông tin cá nhân để bảo mật tài khoản của bạn</p>
+        </div>
+
+        <div class="infor-line"></div>
+
+        <div class="infor-body">
+
+            <div class="infor-left">
+
+                <div class="infor-row">
+                    <label>Họ và tên</label>
+                    <input
+                        type="text"
+                        name="full_name"
+                        value="{{ full_name }}">
+                </div>
+
+                <div class="infor-info-row">
+                    <label>Email</label>
+                    <span id="currentEmailText">{{ email }}</span>
+                    <a href="#" id="openEmailModalBtn">Thay Đổi</a>
+                </div>
+
+                <div class="infor-info-row">
+                    <label>Số điện thoại</label>
+                    <span id="currentPhoneText">{{ phone }}</span>
+                    <a href="#" id="openPhoneModalBtn">Thay Đổi</a>
+                </div>
+
+                <div class="infor-gender-row">
+                    <label>Giới tính</label>
+
+                    <div class="infor-gender-options">
+                        <label>
+                            <input
+                                type="radio"
+                                name="gender"
+                                value="Nam"
+                                {% if gender == "Nam" %}checked{% endif %}>
+                            Nam
+                        </label>
+
+                        <label>
+                            <input
+                                type="radio"
+                                name="gender"
+                                value="Nữ"
+                                {% if gender == "Nữ" %}checked{% endif %}>
+                            Nữ
+                        </label>
+                    </div>
+                </div>
+
+                <div class="infor-info-row">
+                    <label>Ngày sinh</label>
+                    <span id="currentBirthText">{{ date_of_birth or "Chưa cập nhật" }}</span>
+                    <a href="#" id="openBirthModalBtn">Thay Đổi</a>
+                </div>
+
+            </div>
+
+            <div class="infor-divider"></div>
+
+            <div class="infor-right">
+
+                <img
+                    src="{{ avatar_url }}"
+                    data-original-url="{{ avatar_original_url }}"
+                    class="infor-avatar"
+                    id="avatarPreview">
+
+                <input
+                    type="file"
+                    id="avatarOriginalInput"
+                    name="avatar_original"
+                    accept=".png,.jpg,.jpeg"
+                    hidden>
+
+                <input
+                    type="file"
+                    id="avatarInput"
+                    name="avatar"
+                    accept=".png,.jpg,.jpeg"
+                    hidden>
+
+                <button type="button" class="change-avatar-btn" id="chooseAvatarBtn">
+                    Đổi ảnh đại diện
+                </button>
+
+                <p>Định dạng: JPEG, PNG</p>
+
+            </div>
+
+        </div>
+
+        <button type="submit" class="infor-save-btn">Lưu</button>
+
+    </form>
+
+</div>
+
+<div class="avatar-crop-overlay" id="avatarCropOverlay">
+    <div class="avatar-crop-box">
+        <h3>Căn chỉnh ảnh đại diện</h3>
+
+        <div class="avatar-crop-area" id="avatarCropArea">
+            <img id="cropImage">
+        </div>
+
+        <p>Kéo ảnh để chọn vùng hiển thị</p>
+
+        <div class="avatar-crop-actions">
+            <button type="button" id="cancelCropBtn">Hủy</button>
+            <button type="button" id="saveCropBtn">Lưu ảnh</button>
+        </div>
+    </div>
+</div>
+
+<div class="change-modal-overlay" id="emailModalOverlay">
+    <div class="change-modal-box">
+
+        <h3>Thay đổi địa chỉ Email</h3>
+
+        <p class="change-modal-desc">
+            Vui lòng nhập địa chỉ email mới đúng định dạng, ví dụ: ten@example.com. Email này sẽ được dùng để đăng nhập và nhận thông báo từ hệ thống.
+        </p>
+
+        <div class="change-modal-group">
+            <label>Email hiện tại</label>
+            <input
+                type="email"
+                id="oldEmailInput"
+                value="{{ email }}"
+                disabled>
+        </div>
+
+        <div class="change-modal-group">
+            <label>Email mới</label>
+            <input
+                type="email"
+                id="newEmailInput"
+                placeholder="Nhập email mới của bạn">
+        </div>
+
+        <div class="change-modal-message" id="emailModalMessage">
+            <span>ⓘ</span>
+            <p id="emailModalMessageText"></p>
+        </div>
+
+        <p class="change-modal-note">
+            Email mới sẽ được dùng để đăng nhập, nhận thông báo đơn hàng và khôi phục tài khoản khi cần.
+        </p>
+
+        <div class="change-modal-actions">
+            <button type="button" id="cancelEmailModalBtn">Hủy</button>
+            <button type="button" id="saveEmailModalBtn">Tiếp tục</button>
+        </div>
+
+    </div>
+</div>
+
+<div class="change-modal-overlay" id="phoneModalOverlay">
+    <div class="change-modal-box">
+
+        <h3>Thay đổi số điện thoại</h3>
+
+        <p class="change-modal-desc">
+            Vui lòng nhập số điện thoại mới gồm 10 chữ số và bắt đầu bằng số 0. Số điện thoại này sẽ được dùng để đăng nhập và liên hệ khi cần thiết.
+        </p>
+
+        <div class="change-modal-group">
+            <label>Số điện thoại hiện tại</label>
+            <input
+                type="text"
+                id="oldPhoneInput"
+                value="{{ phone }}"
+                disabled>
+        </div>
+
+        <div class="change-modal-group">
+            <label>Số điện thoại mới</label>
+            <input
+                type="text"
+                id="newPhoneInput"
+                placeholder="Nhập số điện thoại mới của bạn">
+        </div>
+
+        <div class="change-modal-message" id="phoneModalMessage">
+            <span>ⓘ</span>
+            <p id="phoneModalMessageText"></p>
+        </div>
+
+        <p class="change-modal-note">
+            Số điện thoại mới sẽ được dùng để đăng nhập, xác nhận đơn hàng và hỗ trợ liên hệ khi cần.
+        </p>
+
+        <div class="change-modal-actions">
+            <button type="button" id="cancelPhoneModalBtn">Hủy</button>
+            <button type="button" id="savePhoneModalBtn">Tiếp tục</button>
+        </div>
+
+    </div>
+</div>
+
+<div class="change-modal-overlay" id="birthModalOverlay">
+    <div class="change-modal-box">
+
+        <h3>Thay đổi ngày sinh</h3>
+
+        <p class="change-modal-desc">
+            Vui lòng chọn ngày sinh chính xác của bạn. Thông tin này sẽ được dùng để hoàn thiện hồ sơ tài khoản.
+        </p>
+
+        <div class="change-modal-group">
+            <label>Ngày sinh hiện tại</label>
+            <input
+                type="date"
+                id="oldBirthInput"
+                value="{{ date_of_birth or '' }}"
+                disabled>
+        </div>
+
+        <div class="change-modal-group">
+            <label>Ngày sinh mới</label>
+            <input
+                type="date"
+                id="newBirthInput">
+        </div>
+
+        <div class="change-modal-message" id="birthModalMessage">
+            <span>ⓘ</span>
+            <p id="birthModalMessageText"></p>
+        </div>
+
+        <p class="change-modal-note">
+            Ngày sinh mới sẽ được lưu tạm. Bạn cần nhấn nút Lưu bên ngoài để cập nhật vào hệ thống.
+        </p>
+
+        <div class="change-modal-actions">
+            <button type="button" id="cancelBirthModalBtn">Hủy</button>
+            <button type="button" id="saveBirthModalBtn">Tiếp tục</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const chooseBtn = document.getElementById("chooseAvatarBtn");
+    const avatarOriginalInput = document.getElementById("avatarOriginalInput");
+    const avatarInput = document.getElementById("avatarInput");
+    const avatarPreview = document.getElementById("avatarPreview");
+
+    const overlay = document.getElementById("avatarCropOverlay");
+    const cropImage = document.getElementById("cropImage");
+    const cropArea = document.getElementById("avatarCropArea");
+    const cancelBtn = document.getElementById("cancelCropBtn");
+    const saveBtn = document.getElementById("saveCropBtn");
+
+    const boxSize = 220;
+    const outputSize = 300;
+
+    const avatarOriginalUrl = avatarPreview.dataset.originalUrl;
+
+    let originalImageSource = avatarOriginalUrl + "?t=" + Date.now();
+    let fileName = "avatar.jpg";
+
+    let posX = 0;
+    let posY = 0;
+    let startX = 0;
+    let startY = 0;
+    let isDragging = false;
+
+    let baseScale = 1;
+    let zoom = 1.25;
+    let imgWidth = 0;
+    let imgHeight = 0;
+
+    let savedZoom = 1.25;
+    let savedPosX = 0;
+    let savedPosY = 0;
+    let hasSavedCrop = false;
+
+    chooseBtn.addEventListener("click", () => {
+        avatarOriginalInput.click();
+    });
+
+    avatarOriginalInput.addEventListener("change", () => {
+        const file = avatarOriginalInput.files[0];
+        if (!file) return;
+
+        fileName = file.name || "avatar.jpg";
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            originalImageSource = reader.result;
+            hasSavedCrop = false;
+
+            openCropOverlay(true);
+        };
+
+        reader.readAsDataURL(file);
+    });
+
+    avatarPreview.addEventListener("click", () => {
+        openCropOverlay(false);
+    });
+
+    function openCropOverlay(resetCrop = false) {
+        cropImage.onload = () => {
+            baseScale = Math.max(
+                boxSize / cropImage.naturalWidth,
+                boxSize / cropImage.naturalHeight
+            );
+
+            if (resetCrop || !hasSavedCrop) {
+                resetCropPosition();
+            } else {
+                zoom = savedZoom;
+                posX = savedPosX;
+                posY = savedPosY;
+            }
+
+            updateCropImage();
+            overlay.style.display = "flex";
+        };
+
+        cropImage.removeAttribute("src");
+
+        setTimeout(() => {
+            cropImage.src = originalImageSource;
+        }, 0);
+    }
+
+    function resetCropPosition() {
+        zoom = 1.25;
+
+        imgWidth = cropImage.naturalWidth * baseScale * zoom;
+        imgHeight = cropImage.naturalHeight * baseScale * zoom;
+
+        posX = (boxSize - imgWidth) / 2;
+        posY = (boxSize - imgHeight) / 2;
+    }
+
+    function updateCropImage() {
+        imgWidth = cropImage.naturalWidth * baseScale * zoom;
+        imgHeight = cropImage.naturalHeight * baseScale * zoom;
+
+        limitPosition();
+
+        cropImage.style.width = imgWidth + "px";
+        cropImage.style.height = imgHeight + "px";
+        cropImage.style.left = posX + "px";
+        cropImage.style.top = posY + "px";
+    }
+
+    function limitPosition() {
+        if (imgWidth <= boxSize) {
+            posX = (boxSize - imgWidth) / 2;
+        } else {
+            if (posX > 0) posX = 0;
+            if (posX < boxSize - imgWidth) posX = boxSize - imgWidth;
+        }
+
+        if (imgHeight <= boxSize) {
+            posY = (boxSize - imgHeight) / 2;
+        } else {
+            if (posY > 0) posY = 0;
+            if (posY < boxSize - imgHeight) posY = boxSize - imgHeight;
+        }
+    }
+
+    cropArea.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        startX = e.clientX - posX;
+        startY = e.clientY - posY;
+        cropArea.style.cursor = "grabbing";
+    });
+
+    document.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+
+        posX = e.clientX - startX;
+        posY = e.clientY - startY;
+
+        updateCropImage();
+    });
+
+    document.addEventListener("mouseup", () => {
+        isDragging = false;
+        cropArea.style.cursor = "grab";
+    });
+
+    cropArea.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        zoomImage(e.deltaY < 0 ? 0.1 : -0.1);
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (overlay.style.display !== "flex") return;
+
+        if (e.key === "+" || e.key === "=") {
+            e.preventDefault();
+            zoomImage(0.1);
+        }
+
+        if (e.key === "-" || e.key === "_") {
+            e.preventDefault();
+            zoomImage(-0.1);
+        }
+    });
+
+    function zoomImage(amount) {
+        const oldWidth = imgWidth;
+        const oldHeight = imgHeight;
+
+        zoom += amount;
+
+        if (zoom < 1) zoom = 1;
+        if (zoom > 3) zoom = 3;
+
+        const newWidth = cropImage.naturalWidth * baseScale * zoom;
+        const newHeight = cropImage.naturalHeight * baseScale * zoom;
+
+        posX -= (newWidth - oldWidth) / 2;
+        posY -= (newHeight - oldHeight) / 2;
+
+        updateCropImage();
+    }
+
+    cancelBtn.addEventListener("click", () => {
+        overlay.style.display = "none";
+    });
+
+    saveBtn.addEventListener("click", () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = outputSize;
+        canvas.height = outputSize;
+
+        const ctx = canvas.getContext("2d");
+        const finalScale = baseScale * zoom;
+
+        ctx.drawImage(
+            cropImage,
+            -posX / finalScale,
+            -posY / finalScale,
+            boxSize / finalScale,
+            boxSize / finalScale,
+            0,
+            0,
+            outputSize,
+            outputSize
+        );
+
+        canvas.toBlob((blob) => {
+            const croppedFile = new File([blob], fileName, {
+                type: "image/jpeg"
+            });
+
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(croppedFile);
+            avatarInput.files = dataTransfer.files;
+
+            savedZoom = zoom;
+            savedPosX = posX;
+            savedPosY = posY;
+            hasSavedCrop = true;
+
+            avatarPreview.src = URL.createObjectURL(blob);
+            avatarPreview.style.objectFit = "cover";
+            avatarPreview.style.objectPosition = "center";
+
+            overlay.style.display = "none";
+        }, "image/jpeg", 0.9);
+    });
+
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const openBirthBtn = document.getElementById("openBirthModalBtn");
+    const birthOverlay = document.getElementById("birthModalOverlay");
+    const cancelBirthBtn = document.getElementById("cancelBirthModalBtn");
+    const saveBirthBtn = document.getElementById("saveBirthModalBtn");
+
+    const oldBirthInput = document.getElementById("oldBirthInput");
+    const newBirthInput = document.getElementById("newBirthInput");
+    const currentBirthText = document.getElementById("currentBirthText");
+    const birthHiddenInput = document.getElementById("birthHiddenInput");
+
+    const birthMessage = document.getElementById("birthModalMessage");
+    const birthMessageText = document.getElementById("birthModalMessageText");
+
+    let oldBirthBeforeOpen = "";
+    let hiddenBirthBeforeOpen = "";
+    let birthSavedTemp = false;
+
+    function showBirthMessage(type, message) {
+        birthMessage.classList.remove("success", "error", "hide");
+        birthMessage.classList.add(type);
+
+        birthMessageText.textContent = message;
+        birthMessage.style.display = "flex";
+    }
+
+    function hideBirthMessage() {
+        birthMessage.style.display = "none";
+        birthMessage.classList.remove("success", "error", "hide");
+        birthMessageText.textContent = "";
+    }
+
+    function openBirthModal() {
+        oldBirthBeforeOpen = currentBirthText.textContent.trim();
+        hiddenBirthBeforeOpen = birthHiddenInput.value.trim();
+
+        if (hiddenBirthBeforeOpen) {
+            oldBirthInput.value = hiddenBirthBeforeOpen;
+        } else {
+            oldBirthInput.value = "";
+        }
+
+        newBirthInput.value = "";
+
+        birthSavedTemp = false;
+        saveBirthBtn.disabled = false;
+        saveBirthBtn.textContent = "Tiếp tục";
+
+        hideBirthMessage();
+
+        birthOverlay.style.display = "flex";
+
+        setTimeout(() => {
+            newBirthInput.focus();
+        }, 100);
+    }
+
+    function closeBirthModal() {
+        birthOverlay.style.display = "none";
+        newBirthInput.value = "";
+
+        birthSavedTemp = false;
+        saveBirthBtn.disabled = false;
+        saveBirthBtn.textContent = "Tiếp tục";
+
+        hideBirthMessage();
+    }
+
+    function cancelBirthModal() {
+        currentBirthText.textContent = oldBirthBeforeOpen;
+        birthHiddenInput.value = hiddenBirthBeforeOpen;
+
+        closeBirthModal();
+    }
+
+    openBirthBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        openBirthModal();
+    });
+
+    cancelBirthBtn.addEventListener("click", () => {
+        cancelBirthModal();
+    });
+
+    birthOverlay.addEventListener("click", (e) => {
+        if (e.target === birthOverlay) {
+            cancelBirthModal();
+        }
+    });
+
+    saveBirthBtn.addEventListener("click", () => {
+        if (birthSavedTemp) {
+            closeBirthModal();
+            return;
+        }
+
+        const oldBirth = oldBirthInput.value.trim();
+        const newBirth = newBirthInput.value.trim();
+
+        if (!newBirth) {
+            showBirthMessage("error", "Ngày sinh mới không được để trống.");
+            newBirthInput.focus();
+            return;
+        }
+
+        const today = new Date();
+        const selectedDate = new Date(newBirth);
+
+        today.setHours(0, 0, 0, 0);
+        selectedDate.setHours(0, 0, 0, 0);
+
+        if (selectedDate > today) {
+            showBirthMessage("error", "Ngày sinh không được lớn hơn ngày hiện tại.");
+            newBirthInput.focus();
+            return;
+        }
+
+        if (newBirth === oldBirth) {
+            showBirthMessage("error", "Ngày sinh mới không được trùng với ngày sinh hiện tại.");
+            newBirthInput.focus();
+            return;
+        }
+
+        currentBirthText.textContent = newBirth;
+        birthHiddenInput.value = newBirth;
+
+        birthSavedTemp = true;
+
+        showBirthMessage(
+            "success",
+            "Ngày sinh mới đã được lưu tạm. Nhấn Tiếp tục để đóng cửa sổ hoặc nhấn Hủy để quay lại thông tin cũ."
+        );
+    });
+
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("birth_error") === "invalid") {
+        openBirthModal();
+        showBirthMessage("error", "Ngày sinh không hợp lệ, vui lòng chọn lại.");
+    }
+
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const openEmailBtn = document.getElementById("openEmailModalBtn");
+    const emailOverlay = document.getElementById("emailModalOverlay");
+    const cancelEmailBtn = document.getElementById("cancelEmailModalBtn");
+    const saveEmailBtn = document.getElementById("saveEmailModalBtn");
+
+    const oldEmailInput = document.getElementById("oldEmailInput");
+    const newEmailInput = document.getElementById("newEmailInput");
+    const currentEmailText = document.getElementById("currentEmailText");
+    const emailHiddenInput = document.getElementById("emailHiddenInput");
+
+    const emailMessage = document.getElementById("emailModalMessage");
+    const emailMessageText = document.getElementById("emailModalMessageText");
+
+    let oldEmailBeforeOpen = "";
+    let hiddenEmailBeforeOpen = "";
+    let emailSavedTemp = false;
+
+    function showEmailMessage(type, message) {
+        emailMessage.classList.remove("success", "error", "hide");
+        emailMessage.classList.add(type);
+
+        emailMessageText.textContent = message;
+        emailMessage.style.display = "flex";
+    }
+
+    function hideEmailMessage() {
+        emailMessage.style.display = "none";
+        emailMessage.classList.remove("success", "error", "hide");
+        emailMessageText.textContent = "";
+    }
+
+    function openEmailModal() {
+        oldEmailBeforeOpen = currentEmailText.textContent.trim();
+        hiddenEmailBeforeOpen = emailHiddenInput.value.trim();
+
+        oldEmailInput.value = oldEmailBeforeOpen;
+        newEmailInput.value = "";
+
+        emailSavedTemp = false;
+        saveEmailBtn.disabled = false;
+        saveEmailBtn.textContent = "Tiếp tục";
+
+        hideEmailMessage();
+
+        emailOverlay.style.display = "flex";
+
+        setTimeout(() => {
+            newEmailInput.focus();
+        }, 100);
+    }
+
+    function closeEmailModal() {
+        emailOverlay.style.display = "none";
+        newEmailInput.value = "";
+
+        emailSavedTemp = false;
+        saveEmailBtn.disabled = false;
+        saveEmailBtn.textContent = "Tiếp tục";
+
+        hideEmailMessage();
+    }
+
+    function cancelEmailModal() {
+        currentEmailText.textContent = oldEmailBeforeOpen;
+        emailHiddenInput.value = hiddenEmailBeforeOpen;
+
+        closeEmailModal();
+    }
+
+    openEmailBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        openEmailModal();
+    });
+
+    cancelEmailBtn.addEventListener("click", () => {
+        cancelEmailModal();
+    });
+
+    emailOverlay.addEventListener("click", (e) => {
+        if (e.target === emailOverlay) {
+            cancelEmailModal();
+        }
+    });
+
+    saveEmailBtn.addEventListener("click", () => {
+        if (emailSavedTemp) {
+            closeEmailModal();
+            return;
+        }
+
+        const oldEmail = oldEmailInput.value.trim();
+        const newEmail = newEmailInput.value.trim();
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!newEmail) {
+            showEmailMessage("error", "Email mới không được để trống.");
+            newEmailInput.focus();
+            return;
+        }
+
+        if (!emailRegex.test(newEmail)) {
+            showEmailMessage("error", "Email không đúng định dạng, vui lòng nhập lại.");
+            newEmailInput.focus();
+            return;
+        }
+
+        if (newEmail.toLowerCase() === oldEmail.toLowerCase()) {
+            showEmailMessage("error", "Email mới không được trùng với email hiện tại.");
+            newEmailInput.focus();
+            return;
+        }
+
+        currentEmailText.textContent = newEmail;
+        emailHiddenInput.value = newEmail;
+
+        emailSavedTemp = true;
+
+        showEmailMessage(
+            "success",
+            "Email mới đã được lưu tạm. Nhấn Tiếp tục để đóng cửa sổ hoặc nhấn Hủy để quay lại thông tin cũ."
+        );
+    });
+
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("email_error") === "exists") {
+        openEmailModal();
+        showEmailMessage("error", "Email này đã tồn tại trong hệ thống.");
+    }
+
+    if (params.get("email_error") === "invalid") {
+        openEmailModal();
+        showEmailMessage("error", "Email không đúng định dạng, vui lòng nhập lại.");
+    }
+
+});
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const openPhoneBtn = document.getElementById("openPhoneModalBtn");
+    const phoneOverlay = document.getElementById("phoneModalOverlay");
+    const cancelPhoneBtn = document.getElementById("cancelPhoneModalBtn");
+    const savePhoneBtn = document.getElementById("savePhoneModalBtn");
+
+    const oldPhoneInput = document.getElementById("oldPhoneInput");
+    const newPhoneInput = document.getElementById("newPhoneInput");
+    const currentPhoneText = document.getElementById("currentPhoneText");
+    const phoneHiddenInput = document.getElementById("phoneHiddenInput");
+
+    const phoneMessage = document.getElementById("phoneModalMessage");
+    const phoneMessageText = document.getElementById("phoneModalMessageText");
+
+    let oldPhoneBeforeOpen = "";
+    let hiddenPhoneBeforeOpen = "";
+    let phoneSavedTemp = false;
+
+    function showPhoneMessage(type, message) {
+        phoneMessage.classList.remove("success", "error", "hide");
+        phoneMessage.classList.add(type);
+
+        phoneMessageText.textContent = message;
+        phoneMessage.style.display = "flex";
+    }
+
+    function hidePhoneMessage() {
+        phoneMessage.style.display = "none";
+        phoneMessage.classList.remove("success", "error", "hide");
+        phoneMessageText.textContent = "";
+    }
+
+    function openPhoneModal() {
+        oldPhoneBeforeOpen = currentPhoneText.textContent.trim();
+        hiddenPhoneBeforeOpen = phoneHiddenInput.value.trim();
+
+        oldPhoneInput.value = oldPhoneBeforeOpen;
+        newPhoneInput.value = "";
+
+        phoneSavedTemp = false;
+        savePhoneBtn.disabled = false;
+        savePhoneBtn.textContent = "Tiếp tục";
+
+        hidePhoneMessage();
+
+        phoneOverlay.style.display = "flex";
+
+        setTimeout(() => {
+            newPhoneInput.focus();
+        }, 100);
+    }
+
+    function closePhoneModal() {
+        phoneOverlay.style.display = "none";
+        newPhoneInput.value = "";
+
+        phoneSavedTemp = false;
+        savePhoneBtn.disabled = false;
+        savePhoneBtn.textContent = "Tiếp tục";
+
+        hidePhoneMessage();
+    }
+
+    function cancelPhoneModal() {
+        currentPhoneText.textContent = oldPhoneBeforeOpen;
+        phoneHiddenInput.value = hiddenPhoneBeforeOpen;
+
+        closePhoneModal();
+    }
+
+    openPhoneBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        openPhoneModal();
+    });
+
+    cancelPhoneBtn.addEventListener("click", () => {
+        cancelPhoneModal();
+    });
+
+    phoneOverlay.addEventListener("click", (e) => {
+        if (e.target === phoneOverlay) {
+            cancelPhoneModal();
+        }
+    });
+
+    newPhoneInput.addEventListener("input", () => {
+        newPhoneInput.value = newPhoneInput.value.replace(/[^0-9]/g, "");
+    });
+
+    savePhoneBtn.addEventListener("click", () => {
+        if (phoneSavedTemp) {
+            closePhoneModal();
+            return;
+        }
+
+        const oldPhone = oldPhoneInput.value.trim();
+        const newPhone = newPhoneInput.value.trim();
+
+        const phoneRegex = /^0[0-9]{9}$/;
+
+        if (!newPhone) {
+            showPhoneMessage("error", "Số điện thoại mới không được để trống.");
+            newPhoneInput.focus();
+            return;
+        }
+
+        if (!phoneRegex.test(newPhone)) {
+            showPhoneMessage("error", "Số điện thoại phải gồm 10 số và bắt đầu bằng 0.");
+            newPhoneInput.focus();
+            return;
+        }
+
+        if (newPhone === oldPhone) {
+            showPhoneMessage("error", "Số điện thoại mới không được trùng với số hiện tại.");
+            newPhoneInput.focus();
+            return;
+        }
+
+        currentPhoneText.textContent = newPhone;
+        phoneHiddenInput.value = newPhone;
+
+        phoneSavedTemp = true;
+
+        showPhoneMessage(
+            "success",
+            "Số điện thoại mới đã được lưu tạm. Nhấn Tiếp tục để đóng cửa sổ hoặc nhấn Hủy để quay lại thông tin cũ."
+        );
+    });
+
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("open_phone_modal") === "1") {
+        openPhoneModal();
+    }
+
+    if (params.get("phone_error") === "exists") {
+        openPhoneModal();
+        showPhoneMessage("error", "Số điện thoại này đã tồn tại trong hệ thống.");
+    }
+
+    if (params.get("phone_error") === "invalid") {
+        openPhoneModal();
+        showPhoneMessage("error", "Số điện thoại phải gồm 10 số và bắt đầu bằng 0.");
+    }
+
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const inforForm = document.querySelector(".infor-card");
+    const saveInforBtn = document.querySelector(".infor-save-btn");
+
+    const avatarOverlay = document.getElementById("avatarCropOverlay");
+    const saveCropBtn = document.getElementById("saveCropBtn");
+
+    const emailOverlay = document.getElementById("emailModalOverlay");
+    const phoneOverlay = document.getElementById("phoneModalOverlay");
+    const birthOverlay = document.getElementById("birthModalOverlay");
+
+    const saveEmailBtn = document.getElementById("saveEmailModalBtn");
+    const savePhoneBtn = document.getElementById("savePhoneModalBtn");
+    const saveBirthBtn = document.getElementById("saveBirthModalBtn");
+
+    const emailHiddenInput = document.getElementById("emailHiddenInput");
+    const phoneHiddenInput = document.getElementById("phoneHiddenInput");
+    const birthHiddenInput = document.getElementById("birthHiddenInput");
+
+    const fullNameInput = document.querySelector('input[name="full_name"]');
+    const avatarInput = document.getElementById("avatarInput");
+    const avatarOriginalInput = document.getElementById("avatarOriginalInput");
+
+    const params = new URLSearchParams(window.location.search);
+    const keepPending = params.get("keep_pending") === "1";
+
+    const originalData = {
+        email: emailHiddenInput ? emailHiddenInput.value.trim() : "",
+        phone: phoneHiddenInput ? phoneHiddenInput.value.trim() : "",
+        birth: birthHiddenInput ? birthHiddenInput.value.trim() : "",
+        fullName: fullNameInput ? fullNameInput.value.trim() : "",
+        gender: getCurrentGender()
+    };
+
+    function getCurrentGender() {
+        const checkedGender = document.querySelector('input[name="gender"]:checked');
+        return checkedGender ? checkedGender.value : "";
+    }
+
+    function isOpen(overlay) {
+        return overlay && window.getComputedStyle(overlay).display !== "none";
+    }
+
+    function clickButton(button) {
+        if (button && !button.disabled) {
+            button.click();
+        }
+    }
+
+    function hasInforChanged() {
+        const currentEmail = emailHiddenInput ? emailHiddenInput.value.trim() : "";
+        const currentPhone = phoneHiddenInput ? phoneHiddenInput.value.trim() : "";
+        const currentBirth = birthHiddenInput ? birthHiddenInput.value.trim() : "";
+        const currentFullName = fullNameInput ? fullNameInput.value.trim() : "";
+        const currentGender = getCurrentGender();
+
+        const hasAvatarChanged =
+            (avatarInput && avatarInput.files.length > 0) ||
+            (avatarOriginalInput && avatarOriginalInput.files.length > 0);
+
+        return (
+            currentEmail !== originalData.email ||
+            currentPhone !== originalData.phone ||
+            currentBirth !== originalData.birth ||
+            currentFullName !== originalData.fullName ||
+            currentGender !== originalData.gender ||
+            hasAvatarChanged
+        );
+    }
+
+    function showInforNotice(message) {
+        let oldNotice = document.getElementById("inforNoticeToast");
+
+        if (oldNotice) {
+            oldNotice.remove();
+        }
+
+        const notice = document.createElement("div");
+        notice.id = "inforNoticeToast";
+        notice.textContent = message;
+
+        notice.style.position = "fixed";
+        notice.style.top = "95px";
+        notice.style.right = "30px";
+        notice.style.zIndex = "99999";
+        notice.style.background = "#FFF8E1";
+        notice.style.color = "#8A5A00";
+        notice.style.borderLeft = "5px solid #F59E0B";
+        notice.style.boxShadow = "0 4px 16px rgba(0,0,0,0.18)";
+        notice.style.padding = "14px 18px";
+        notice.style.borderRadius = "6px";
+        notice.style.fontSize = "15px";
+        notice.style.fontFamily = "Roboto, Arial, sans-serif";
+        notice.style.transition = "0.3s ease";
+
+        document.body.appendChild(notice);
+
+        setTimeout(() => {
+            notice.style.opacity = "0";
+            notice.style.transform = "translateX(30px)";
+
+            setTimeout(() => {
+                notice.remove();
+            }, 300);
+        }, 2500);
+    }
+
+    function submitInforWithCheck(e) {
+        if (e) {
+            e.preventDefault();
+        }
+
+        if (!keepPending && !hasInforChanged()) {
+            showInforNotice("Bạn chưa có thay đổi nào để lưu.");
+            return;
+        }
+
+        if (inforForm) {
+            HTMLFormElement.prototype.submit.call(inforForm);
+        }
+    }
+
+    if (inforForm) {
+        inforForm.addEventListener("submit", submitInforWithCheck);
+    }
+
+    if (saveInforBtn) {
+        saveInforBtn.addEventListener("click", submitInforWithCheck);
+    }
+
+    window.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+
+        const activeElement = document.activeElement;
+
+        if (activeElement && activeElement.tagName === "TEXTAREA") {
+            return;
+        }
+
+        if (isOpen(avatarOverlay)) {
+            e.preventDefault();
+            clickButton(saveCropBtn);
+            return;
+        }
+
+        if (isOpen(emailOverlay)) {
+            e.preventDefault();
+            clickButton(saveEmailBtn);
+            return;
+        }
+
+        if (isOpen(phoneOverlay)) {
+            e.preventDefault();
+            clickButton(savePhoneBtn);
+            return;
+        }
+
+        if (isOpen(birthOverlay)) {
+            e.preventDefault();
+            clickButton(saveBirthBtn);
+            return;
+        }
+
+        e.preventDefault();
+        submitInforWithCheck(e);
+    }, true);
+
+});
+</script>
+
+{% endblock %}

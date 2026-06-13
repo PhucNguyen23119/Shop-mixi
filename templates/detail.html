@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Chi tiết</title>
+
+<style>
+.container { display: flex; gap: 40px; }
+
+.left { width: 50%; }
+.main-img { width: 100%; height: 400px; object-fit: contain; }
+
+.thumbs img {
+  width: 70px;
+  margin: 5px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+}
+
+.right { width: 50%; }
+
+.color-btn, .storage-btn {
+  padding: 8px 12px;
+  margin: 5px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.active {
+  border: 2px solid red;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>{{phone.name}}</h1>
+
+<div class="container">
+
+<!-- LEFT -->
+<div class="left">
+  <img id="mainImage" class="main-img">
+
+  <div id="thumbs"></div>
+</div>
+
+<!-- RIGHT -->
+<div class="right">
+
+  <h3>Màu sắc</h3>
+  {% for c in colors %}
+    <button 
+      class="color-btn" 
+      data-id="{{c.id}}"
+      onclick="selectColor({{c.id}})">
+      {{c.color_name}}
+    </button>
+  {% endfor %}
+
+  <h3>Dung lượng</h3>
+  {% for v in variants %}
+    <button 
+      class="storage-btn"
+      data-color="{{v.color_id}}"
+      data-price="{{v.price}}"
+      data-img="{{v.image_main}}"
+      onclick="selectVariant(this)">
+      {{v.storage}}
+    </button>
+  {% endfor %}
+
+  <h2 id="price"></h2>
+
+  <h3>Thông số</h3>
+  <p><b>Chip:</b> {{phone.chipset}}</p>
+  <p><b>RAM:</b> {{phone.ram}}</p>
+  <p><b>Màn hình:</b> {{phone.screen_size}} - {{phone.screen_type}}</p>
+  <p><b>Camera:</b> {{phone.rear_camera}}</p>
+  <p><b>Pin:</b> {{phone.battery}}</p>
+
+</div>
+
+</div>
+
+<script>
+let images = {{ images|tojson }};
+let selectedColor = {{ selected_color or 0 }};
+
+// =====================
+// 🎨 CHỌN MÀU
+// =====================
+function selectColor(colorId) {
+  selectedColor = colorId;
+
+  // active button
+  document.querySelectorAll('.color-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.dataset.id == colorId) btn.classList.add('active');
+  });
+
+  // filter ảnh
+  let filtered = images.filter(i => i.color_id == colorId);
+
+  if (filtered.length == 0) return;
+
+  // ảnh chính
+  let main = filtered.find(i => i.is_primary == 1) || filtered[0];
+  document.getElementById("mainImage").src = main.image_url;
+
+  // thumbnails
+  let thumbs = document.getElementById("thumbs");
+  thumbs.innerHTML = "";
+
+  filtered.forEach(img => {
+    thumbs.innerHTML += `
+      <img src="${img.image_url}" onclick="setMain('${img.image_url}')">
+    `;
+  });
+
+  // auto chọn variant theo màu
+  autoSelectVariant();
+}
+
+// =====================
+// 💾 CHỌN VARIANT
+// =====================
+function selectVariant(btn) {
+
+  document.querySelectorAll('.storage-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  let price = btn.dataset.price;
+  let img = btn.dataset.img;
+
+  document.getElementById("price").innerText =
+    Number(price).toLocaleString() + "đ";
+
+  document.getElementById("mainImage").src = img;
+}
+
+// =====================
+// 🔁 AUTO SELECT VARIANT THEO MÀU
+// =====================
+function autoSelectVariant() {
+  let btns = document.querySelectorAll('.storage-btn');
+
+  for (let btn of btns) {
+    if (btn.dataset.color == selectedColor) {
+      btn.click();
+      break;
+    }
+  }
+}
+
+// =====================
+function setMain(src) {
+  document.getElementById("mainImage").src = src;
+}
+
+// =====================
+// 🚀 LOAD BAN ĐẦU
+// =====================
+window.onload = function() {
+
+  // nếu có màu truyền từ index → dùng luôn
+  if (selectedColor) {
+    selectColor(selectedColor);
+  } else {
+    // fallback màu đầu
+    let first = document.querySelector('.color-btn');
+    if (first) selectColor(first.dataset.id);
+  }
+
+}
+</script>
+
+</body>
+</html>

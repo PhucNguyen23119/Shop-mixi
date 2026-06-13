@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="breadcrumb">
+    <a href="/" class="breadcrumb-home">Trang chủ</a>
+    <span class="breadcrumb-separator">></span>
+
+    <a href="{{ parent_url }}" class="breadcrumb-home">
+        {{ parent_name }}
+    </a>
+
+    <span class="breadcrumb-separator">></span>
+    <span class="breadcrumb-current">Xác thực mã OTP</span>
+</div>
+
+<div class="signin-wrapper">
+
+    <div class="signin-card otp-card">
+
+        <a href="{{ back_url|default('/signin') }}" class="back-btn">
+            <img
+                src="{{ url_for('static', filename='img/arrow-left.png') }}"
+                class="back-arrow"
+                alt="Back">
+        </a>
+
+        <img
+            src="{{ url_for('static', filename='img/otp.png') }}"
+            class="otp-icon"
+            alt="OTP Icon">
+
+        <h1 class="otp-title">Xác thực mã OTP</h1>
+
+        <p class="otp-subtitle">
+            Chúng tôi đã gửi mã xác thực đến số điện thoại/email của bạn.
+            Vui lòng nhập mã gồm 6 chữ số bên dưới.
+        </p>
+
+        <div class="otp-inputs">
+            <input type="text" maxlength="1" inputmode="numeric">
+            <input type="text" maxlength="1" inputmode="numeric">
+            <input type="text" maxlength="1" inputmode="numeric">
+            <input type="text" maxlength="1" inputmode="numeric">
+            <input type="text" maxlength="1" inputmode="numeric">
+            <input type="text" maxlength="1" inputmode="numeric">
+        </div>
+
+        <div class="otp-error" id="otpError">
+           <span>ⓘ</span>
+           <p id="otpErrorText">Mã OTP sai, vui lòng nhập lại.</p>
+        </div>
+
+        <button class="otp-btn" id="otpSubmit">
+            Tiếp tục
+        </button>
+
+        <div class="otp-line"></div>
+
+        <div class="otp-resend">
+            <span>Bạn chưa nhận được mã?</span>
+            <a href="#">Gửi lại mã</a>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const inputs = document.querySelectorAll(".otp-inputs input");
+    const otpBtn = document.getElementById("otpSubmit");
+    const otpError = document.getElementById("otpError");
+    const otpErrorText = document.getElementById("otpErrorText");
+
+    function submitOtpForm(actionUrl, otpValue) {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = actionUrl;
+
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "otp_code";
+        input.value = otpValue;
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function clearOtpError() {
+        otpError.style.display = "none";
+
+        inputs.forEach(input => {
+            input.classList.remove("error");
+        });
+    }
+
+    function showOtpError(message, clearInput = false) {
+        otpErrorText.textContent = message;
+        otpError.style.display = "flex";
+
+        inputs.forEach(input => {
+            input.classList.add("error");
+
+            if (clearInput) {
+                input.value = "";
+            }
+        });
+
+        inputs[0].focus();
+    }
+
+    function handleOtpSubmit() {
+        let otpValue = "";
+
+        inputs.forEach(input => {
+            otpValue += input.value;
+        });
+
+        if (otpValue.length === 0) {
+            showOtpError("Mã OTP không được để trống.");
+            return;
+        }
+
+        if (otpValue.length < 6) {
+            showOtpError("Vui lòng nhập đủ 6 chữ số OTP.");
+            return;
+        }
+
+        if (otpValue !== "279279") {
+            showOtpError("Mã OTP sai, vui lòng nhập lại.", true);
+            return;
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const fromPage = params.get("from");
+
+        if (fromPage === "signup") {
+            submitOtpForm("/verify-signup-otp", otpValue);
+            return;
+        }
+
+        if (fromPage === "signin") {
+            submitOtpForm("/verify-signin-otp", otpValue);
+            return;
+        }
+
+        if (fromPage === "forgetpassword") {
+            window.location.href = "/resetpassword";
+            return;
+        }
+
+        if (fromPage === "change_email") {
+            submitOtpForm("/verify-change-email-otp", otpValue);
+            return;
+        }
+
+        if (fromPage === "change_phone") {
+            submitOtpForm("/verify-change-phone-otp", otpValue);
+            return;
+        }
+
+        if (fromPage === "infor_save") {
+            submitOtpForm("/verify-infor-save-otp", otpValue);
+            return;
+        }
+
+        window.location.href = "/signin";
+    }
+
+    inputs.forEach((input, index) => {
+
+        input.addEventListener("input", () => {
+            input.value = input.value.replace(/[^0-9]/g, "");
+
+            clearOtpError();
+
+            if (input.value && index < inputs.length - 1) {
+                inputs[index + 1].focus();
+            }
+        });
+
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Backspace" && !input.value && index > 0) {
+                inputs[index - 1].focus();
+            }
+        });
+
+        input.addEventListener("paste", (e) => {
+            e.preventDefault();
+
+            const pastedValue = e.clipboardData
+                .getData("text")
+                .replace(/[^0-9]/g, "")
+                .slice(0, 6);
+
+            if (!pastedValue) return;
+
+            inputs.forEach((item, i) => {
+                item.value = pastedValue[i] || "";
+            });
+
+            clearOtpError();
+
+            const nextIndex = Math.min(pastedValue.length, inputs.length - 1);
+            inputs[nextIndex].focus();
+        });
+    });
+
+    otpBtn.addEventListener("click", () => {
+        handleOtpSubmit();
+    });
+
+    window.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+
+        e.preventDefault();
+        handleOtpSubmit();
+    }, true);
+
+    setTimeout(() => {
+        inputs[0].focus();
+    }, 100);
+
+});
+</script>
+
+{% endblock %}

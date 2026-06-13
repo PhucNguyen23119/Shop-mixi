@@ -1,0 +1,481 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div style="
+    background:#f5f5f7;
+    min-height:100vh;
+    padding-bottom:80px;
+">
+
+
+    <!-- VIDEO -->
+    <div style="
+        display:flex;
+        justify-content:center;
+        padding-top:40px;
+    ">
+
+        <div style="
+            width:900px;
+            aspect-ratio:16/9;
+            border-radius:28px;
+            overflow:hidden;
+            box-shadow:0 10px 40px rgba(0,0,0,0.18);
+        ">
+
+            <iframe
+                src="https://www.youtube.com/embed/kWnUtfOhIVA?autoplay=1&mute=1&controls=1&rel=0"
+                title="YouTube video player"
+                frameborder="0"
+                allow="autoplay; encrypted-media"
+                allowfullscreen
+                style="
+                    width:100%;
+                    height:100%;
+                    border:none;
+                ">
+            </iframe>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- TITLE -->
+    <div style="
+        width:1200px;
+        margin:70px auto 20px auto;
+    ">
+
+        <div style="
+            display:flex;
+            align-items:center;
+            gap:14px;
+            margin-bottom:10px;
+        ">
+
+            <div style="
+                width:14px;
+                height:14px;
+                border-radius:50%;
+                background:linear-gradient(135deg,#0071e3,#6ea8ff);
+                box-shadow:0 0 15px rgba(0,113,227,0.5);
+            ">
+            </div>
+
+            <span style="
+                font-size:15px;
+                color:#0071e3;
+                font-weight:600;
+                letter-spacing:1px;
+            ">
+                APPLE FLAGSHIP 2026
+            </span>
+
+        </div>
+
+
+        <h1 style="
+            font-size:64px;
+            line-height:1.1;
+            margin:0;
+            font-weight:800;
+            color:#111;
+        ">
+            iPhone 17 Pro Max
+        </h1>
+
+        <p style="
+            margin-top:18px;
+            font-size:20px;
+            color:#666;
+            width:700px;
+            line-height:1.6;
+        ">
+            Hiệu năng mạnh mẽ với Apple A19 Pro, màn hình OLED 120Hz,
+            camera chuyên nghiệp 48MP và thiết kế Titan cao cấp.
+        </p>
+
+    </div>
+
+
+
+
+    <!-- SPEC GRID -->
+    <div style="
+        width:1200px;
+        margin:40px auto;
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+        gap:24px;
+    ">
+
+
+        <!-- CARD -->
+        <div style="
+            background:linear-gradient(145deg,#050505,#111);
+            color:white;
+            padding:28px;
+            border-radius:28px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.12);
+            border:1px solid rgba(255,255,255,0.05);
+        ">
+
+            <div style="
+                color:#7f8c9a;
+                font-size:14px;
+                font-weight:600;
+                margin-bottom:18px;
+                letter-spacing:1px;
+            ">
+                HỆ ĐIỀU HÀNH
+            </div>
+
+            <div style="
+                font-size:42px;
+                font-weight:800;
+                margin-bottom:10px;
+            ">
+                iOS 26
+            </div>
+
+            <div style="
+                color:#999;
+                font-size:16px;
+                line-height:1.5;
+            ">
+                Apple Intelligence tích hợp AI thế hệ mới.
+            </div>
+
+        </div>
+
+
+
+
+
+        <div style="
+            background:linear-gradient(145deg,#050505,#111);
+            color:white;
+            padding:28px;
+            border-radius:28px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.12);
+            border:1px solid rgba(255,255,255,0.05);
+        ">
+
+            <div style="
+                color:#7f8c9a;
+                font-size:14px;
+                font-weight:600;
+                margin-bottom:18px;
+                letter-spacing:1px;
+            ">
+                CHIP XỬ LÝ
+            </div>
+
+            <div style="
+                font-size:34px;
+                font-weight:800;
+                line-height:1.3;
+            ">
+                Apple A19 Pro
+            </div>
+
+            <div style="
+                margin-top:14px;
+                color:#999;
+                line-height:1.5;
+            ">
+                GPU 6 nhân • Neural Engine thế hệ mới.
+            </div>
+
+        </div>
+
+
+
+
+
+        <div style="
+            background:linear-gradient(145deg,#050505,#111);
+            color:white;
+            padding:28px;
+            border-radius:28px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.12);
+            border:1px solid rgba(255,255,255,0.05);
+        ">
+
+            <div style="
+                color:#7f8c9a;
+                font-size:14px;
+                font-weight:600;
+                margin-bottom:18px;
+                letter-spacing:1px;
+            ">
+                RAM & LƯU TRỮ
+            </div>
+
+            <div style="
+                font-size:42px;
+                font-weight:800;
+                margin-bottom:8px;
+            ">
+                8GB
+            </div>
+
+            <div style="
+                color:#999;
+                font-size:16px;
+                line-height:1.5;
+            ">
+                256GB / 512GB / 1TB
+            </div>
+
+        </div>
+
+
+
+
+
+        <div style="
+            background:linear-gradient(145deg,#050505,#111);
+            color:white;
+            padding:28px;
+            border-radius:28px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.12);
+            border:1px solid rgba(255,255,255,0.05);
+        ">
+
+            <div style="
+                color:#7f8c9a;
+                font-size:14px;
+                font-weight:600;
+                margin-bottom:18px;
+                letter-spacing:1px;
+            ">
+                MÀN HÌNH
+            </div>
+
+            <div style="
+                font-size:40px;
+                font-weight:800;
+                margin-bottom:12px;
+            ">
+                6.9” OLED
+            </div>
+
+            <div style="
+                color:#bbb;
+                line-height:1.7;
+                font-size:16px;
+            ">
+                120Hz ProMotion <br>
+                Always-On Display <br>
+                2500 nits peak brightness
+            </div>
+
+        </div>
+
+
+
+
+
+        <div style="
+            background:linear-gradient(145deg,#050505,#111);
+            color:white;
+            padding:28px;
+            border-radius:28px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.12);
+            border:1px solid rgba(255,255,255,0.05);
+        ">
+
+            <div style="
+                color:#7f8c9a;
+                font-size:14px;
+                font-weight:600;
+                margin-bottom:18px;
+                letter-spacing:1px;
+            ">
+                CAMERA PRO
+            </div>
+
+            <div style="
+                font-size:26px;
+                font-weight:800;
+                line-height:1.5;
+            ">
+                48MP + 48MP + 48MP
+            </div>
+
+            <div style="
+                margin-top:16px;
+                color:#bbb;
+                line-height:1.8;
+                font-size:16px;
+            ">
+                Zoom quang học 5x <br>
+                Dolby Vision HDR <br>
+                ProRAW • Night Mode
+            </div>
+
+        </div>
+
+
+
+
+
+        <div style="
+            background:linear-gradient(145deg,#050505,#111);
+            color:white;
+            padding:28px;
+            border-radius:28px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.12);
+            border:1px solid rgba(255,255,255,0.05);
+        ">
+
+            <div style="
+                color:#7f8c9a;
+                font-size:14px;
+                font-weight:600;
+                margin-bottom:18px;
+                letter-spacing:1px;
+            ">
+                PIN & SẠC
+            </div>
+
+            <div style="
+                font-size:42px;
+                font-weight:800;
+                margin-bottom:12px;
+            ">
+                4800 mAh
+            </div>
+
+            <div style="
+                color:#bbb;
+                line-height:1.8;
+                font-size:16px;
+            ">
+                Sạc nhanh 40W <br>
+                MagSafe <br>
+                USB-C
+            </div>
+
+        </div>
+
+
+
+
+
+        <div style="
+            background:linear-gradient(145deg,#050505,#111);
+            color:white;
+            padding:28px;
+            border-radius:28px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.12);
+            border:1px solid rgba(255,255,255,0.05);
+        ">
+
+            <div style="
+                color:#7f8c9a;
+                font-size:14px;
+                font-weight:600;
+                margin-bottom:18px;
+                letter-spacing:1px;
+            ">
+                THIẾT KẾ
+            </div>
+
+            <div style="
+                font-size:34px;
+                font-weight:800;
+                margin-bottom:14px;
+            ">
+                Khung Titan
+            </div>
+
+            <div style="
+                color:#bbb;
+                line-height:1.8;
+                font-size:16px;
+            ">
+                IP68 chống nước <br>
+                231g <br>
+                Dynamic Island
+            </div>
+
+        </div>
+
+
+
+
+
+        <div style="
+            background:linear-gradient(145deg,#050505,#111);
+            color:white;
+            padding:28px;
+            border-radius:28px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.12);
+            border:1px solid rgba(255,255,255,0.05);
+        ">
+
+            <div style="
+                color:#7f8c9a;
+                font-size:14px;
+                font-weight:600;
+                margin-bottom:18px;
+                letter-spacing:1px;
+            ">
+                KẾT NỐI
+            </div>
+
+            <div style="
+                font-size:34px;
+                font-weight:800;
+                margin-bottom:12px;
+            ">
+                5G • Wi-Fi 7
+            </div>
+
+            <div style="
+                color:#bbb;
+                line-height:1.8;
+                font-size:16px;
+            ">
+                Bluetooth 6 <br>
+                eSIM <br>
+                GPS • Galileo
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- FOOT -->
+    <div style="
+        width:1200px;
+        margin:60px auto 0 auto;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        color:#666;
+        font-size:15px;
+    ">
+
+        <div>
+             Apple Concept 2026
+        </div>
+
+        <div>
+            Giá dự kiến từ $1,399
+        </div>
+
+    </div>
+
+
+</div>
+
+{% endblock %}
