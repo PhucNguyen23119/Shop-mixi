@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, Response, url_for
+from flask import Flask, render_template, request, redirect, session, Response, url_for, jsonify
 import pyodbc
 import hashlib
 import os
@@ -11,11 +11,41 @@ app.secret_key = "technova_secret_key"
 def get_conn():
     return pyodbc.connect(
         "DRIVER={ODBC Driver 17 for SQL Server};"
-        "SERVER=DESKTOP-U2HLROF\\SQLEXPRESS;"
+        r"SERVER=DESKTOP-THU75VC\SQLEXPRESS;"
         "DATABASE=Technova;"
         "Trusted_Connection=yes;"
     )
 
+# =========================
+# 🛒 SQL sản phẩm từ bài 2
+# Giữ riêng để không làm hỏng database tài khoản của bài 1.
+# Nếu bạn đã gộp tất cả bảng vào cùng database, đổi product_database thành "Technova1".
+# =========================
+PRODUCT_DB_CONFIG = {
+    "server": r"DESKTOP-THU75VC\SQLEXPRESS",
+    "database": "Technova",
+    "driver": "{ODBC Driver 17 for SQL Server}"
+}
+
+
+def get_product_conn():
+    return pyodbc.connect(
+        f"DRIVER={PRODUCT_DB_CONFIG['driver']};"
+        f"SERVER={PRODUCT_DB_CONFIG['server']};"
+        f"DATABASE={PRODUCT_DB_CONFIG['database']};"
+        "Trusted_Connection=yes;"
+    )
+
+
+def format_price(price):
+    return f"{int(price):,}".replace(",", ".") + " đ"
+
+
+def safe_float(value, default=0):
+    try:
+        return float(value)
+    except Exception:
+        return default
 
 def get_last_name(full_name):
     if not full_name:
@@ -1130,42 +1160,41 @@ def otp():
 # =========================
 @app.route("/phones")
 def phones():
-    return render_template("phones.html")
-
+    return redirect("/products?category=phone")
 
 @app.route("/tablets")
 def tablets():
-    return render_template("tablets.html")
+    return redirect("/products?category=tablet")
 
 
 @app.route("/laptops")
 def laptops():
-    return render_template("laptops.html")
+    return redirect("/products?category=laptop")
 
 
 @app.route("/ipads")
 def ipads():
-    return render_template("ipads.html")
+    return redirect("/products?category=ipad")
 
 
 @app.route("/headphones")
 def headphones():
-    return render_template("headphones.html")
+    return redirect("/products?category=audio")
 
 
 @app.route("/accessories")
 def accessories():
-    return render_template("accessories.html")
+    return redirect("/products?category=accessory")
 
 
 @app.route("/watches")
 def watches():
-    return render_template("watches.html")
+    return redirect("/products?category=watch")
 
 
 @app.route("/monitors")
 def monitors():
-    return render_template("monitors.html")
+    return redirect("/products?category=printer")
 
 @app.route("/change-email", methods=["POST"])
 def change_email():
@@ -1391,8 +1420,205 @@ def verify_change_email_otp():
 
     return redirect("/infor?email_success=1")
 
+
 # =========================
-# 📱 TRANG CHI TIẾT
+# 🛒 TRANG SẢN PHẨM - giao diện thêm từ bài 2
+# =========================
+@app.route("/cart")
+def cart():
+    return render_template("cart.html")
+
+
+@app.route("/products")
+def products_page():
+    return render_template("products.html")
+
+
+@app.route("/detail")
+def product_detail_page():
+    return render_template("product_detail.html")
+
+
+@app.route("/api/check-product-db")
+def check_product_db():
+    try:
+        conn = get_product_conn()
+        cursor = conn.cursor()
+        cursor.execute("SELECT DB_NAME() AS database_name")
+        row = cursor.fetchone()
+        conn.close()
+        return jsonify({"connected": True, "database": row.database_name})
+    except Exception as error:
+        return jsonify({"connected": False, "error": str(error)}), 500
+
+
+@app.route("/api/products")
+def get_products_api():
+    try:
+        conn = get_product_conn()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT
+                id,
+                name,
+                category,
+                brand,
+                description,
+                old_price_text,
+                old_price_number,
+                discount,
+                has_discount,
+                rating,
+                sold,
+                technical_image,
+                default_storage_order,
+                default_color_order,
+                is_flash_sale,
+                is_featured,
+                is_new
+            FROM products
+            ORDER BY id
+        """)
+
+        product_rows = cursor.fetchall()
+        products = []
+
+        for row in product_rows:
+            product_id = row.id
+
+            cursor.execute("""
+                SELECT storage, ram, price_text, price_number
+                FROM product_storages
+                WHERE product_id = ?
+                ORDER BY display_order
+            """, product_id)
+
+            storages = [
+                {
+                    "storage": storage.storage,
+                    "ram": storage.ram,
+                    "price": storage.price_text,
+                    "priceNumber": int(storage.price_number or 0)
+                }
+                for storage in cursor.fetchall()
+            ]
+
+            cursor.execute("""
+                SELECT id, color_name, color_code, main_image AS image
+                FROM product_colors
+                WHERE product_id = ?
+                ORDER BY display_order
+            """, product_id)
+
+            colors = []
+            for color in cursor.fetchall():
+                cursor.execute("""
+                    SELECT image_url AS image
+                    FROM product_color_images
+                    WHERE color_id = ?
+                    ORDER BY display_order
+                """, color.id)
+
+                gallery = [gallery.image for gallery in cursor.fetchall()]
+
+                colors.append({
+                    "name": color.color_name,
+                    "code": color.color_code,
+                    "image": color.image,
+                    "gallery": gallery
+                })
+
+            cursor.execute("""
+                SELECT id, title
+                FROM product_spec_groups
+                WHERE product_id = ?
+                ORDER BY display_order
+            """, product_id)
+
+            full_specifications = []
+            for group in cursor.fetchall():
+                cursor.execute("""
+                    SELECT label, value
+                    FROM product_spec_items
+                    WHERE group_id = ?
+                    ORDER BY display_order
+                """, group.id)
+
+                full_specifications.append({
+                    "title": group.title,
+                    "items": [
+                        {"label": item.label, "value": item.value}
+                        for item in cursor.fetchall()
+                    ]
+                })
+
+            cursor.execute("""
+                SELECT reviewer_name, rating, comment
+                FROM product_reviews
+                WHERE product_id = ?
+                ORDER BY id
+            """, product_id)
+
+            reviews = [
+                {
+                    "user": review.reviewer_name,
+                    "rating": int(review.rating or 0),
+                    "comment": review.comment
+                }
+                for review in cursor.fetchall()
+            ]
+
+            default_storage_index = (row.default_storage_order or 1) - 1
+            default_color_index = (row.default_color_order or 1) - 1
+
+            default_storage = storages[default_storage_index] if len(storages) > default_storage_index else None
+            default_color = colors[default_color_index] if len(colors) > default_color_index else None
+
+            specs = []
+            if default_storage:
+                if default_storage.get("storage"):
+                    specs.append(default_storage["storage"].replace(" ", ""))
+                if default_storage.get("ram"):
+                    specs.append(default_storage["ram"] + " RAM")
+
+            products.append({
+                "id": row.id,
+                "name": row.name,
+                "category": row.category,
+                "brand": row.brand,
+                "desc": row.description,
+                "price": default_storage["price"] if default_storage else "",
+                "priceNumber": default_storage["priceNumber"] if default_storage else 0,
+                "oldPrice": row.old_price_text or "",
+                "discount": row.discount or "",
+                "hasDiscount": bool(row.has_discount),
+                "storages": storages,
+                "colors": colors,
+                "specs": specs,
+                "fullSpecifications": full_specifications,
+                "image": default_color["image"] if default_color else "",
+                "technicalImage": row.technical_image or "",
+                "rating": safe_float(row.rating),
+                "sold": int(row.sold or 0),
+                "reviews": reviews,
+                "isFlashSale": bool(row.is_flash_sale),
+                "isFeatured": bool(row.is_featured),
+                "isNew": bool(row.is_new)
+            })
+
+        conn.close()
+        return jsonify(products)
+
+    except Exception as error:
+        print("Lỗi API sản phẩm:", error, flush=True)
+        return jsonify({
+            "message": "Không thể lấy dữ liệu sản phẩm. Kiểm tra PRODUCT_DB_CONFIG và các bảng sản phẩm.",
+            "error": str(error)
+        }), 500
+
+# =========================
+# 📱 TRANG CHI TIẾT CŨ CỦA BÀI 1
 # =========================
 @app.route("/detail/<int:id>")
 def detail(id):
@@ -1442,7 +1668,7 @@ def detail(id):
     conn.close()
 
     return render_template(
-        "detail.html",
+        "detail_old.html",
         phone=phone,
         colors=colors,
         images=images,

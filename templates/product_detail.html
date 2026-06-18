@@ -1,0 +1,178 @@
+{% extends "base.html" %} {% block title %}Chi tiết sản phẩm{% endblock %} {%
+block extra_head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/shop.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="shop-page">
+  <main class="detail-page">
+    <section class="detail-layout">
+      <section class="detail-left">
+        <div class="product-gallery">
+          <div class="main-preview">
+            <img alt="" class="detail-img" src="" />
+          </div>
+          <button class="gallery-arrow left">
+            <span>❮</span>
+          </button>
+          <button class="gallery-arrow right">
+            <span>❯</span>
+          </button>
+          <div class="thumb-list">
+            <button class="video-btn">Video</button>
+          </div>
+        </div>
+        <div class="product-policy">
+          <h3>Chính sách sản phẩm</h3>
+          <div class="policy-grid">
+            <p>🚚 Miễn phí vận chuyển</p>
+            <p>🛡️ Bảo hành 2 năm</p>
+            <p>⚙️ Sản phẩm chính hãng</p>
+            <p>🔁 1 đổi 1 trong 60 ngày</p>
+          </div>
+        </div>
+      </section>
+      <section class="detail-right">
+        <div class="detail-header">
+          <div class="title-row">
+            <h1 class="detail-name"></h1>
+            <span class="detail-sold"></span>
+          </div>
+          <p class="detail-rating"></p>
+          <p class="detail-price"></p>
+        </div>
+        <div class="option-group">
+          <h3>Phiên bản</h3>
+          <div class="option-list">
+            <button class="active">256 GB</button>
+            <button>512 GB</button>
+            <button>1 TB</button>
+            <button>2 TB</button>
+          </div>
+        </div>
+        <div class="option-group">
+          <h3>Màu sắc</h3>
+          <div class="color-options">
+            <button class="active">
+              <span></span>
+              Cam vũ trụ
+            </button>
+            <button>
+              <span></span>
+              Bạc
+            </button>
+            <button>
+              <span></span>
+              Xanh đậm
+            </button>
+          </div>
+        </div>
+        <div class="highlight-specs">
+          <h3>Thông số nổi bật</h3>
+          <div class="spec-grid">
+            <div>
+              <span>Kích thước màn hình</span>
+              <strong class="highlight-screen-size">Đang cập nhật</strong>
+            </div>
+
+            <div>
+              <span>CPU</span>
+              <strong class="highlight-chipset">Đang cập nhật</strong>
+            </div>
+          </div>
+        </div>
+        <div class="quantity-cart">
+          <div class="quantity-box">
+            <button type="button" class="qty-minus">-</button>
+            <span class="qty-number">1</span>
+            <button type="button" class="qty-plus">+</button>
+          </div>
+
+          <button type="button" class="add-cart-btn">Thêm vào giỏ hàng</button>
+        </div>
+
+        <button type="button" class="buy-now-btn">Mua ngay</button>
+      </section>
+    </section>
+    <section class="detail-extra">
+      <div class="technical-image-card">
+        <img alt="" class="technical-image" src="" />
+      </div>
+      <aside class="detail-promo-policy">
+        <div class="special-promo">
+          <h3>Khuyến mãi đặc biệt</h3>
+          <p>
+            - Ưu đãi độc quyền cho thành viên Technova với nhiều quà tặng công
+            nghệ hấp dẫn.
+          </p>
+          <p>
+            - Miễn phí giao hàng toàn quốc và hỗ trợ bảo hành chính hãng lên đến
+            24 tháng.
+          </p>
+        </div>
+        <div class="support-policy">
+          <h3>Chính sách hỗ trợ</h3>
+          <p>
+            🔁 Hỗ trợ đổi trả nhanh chóng trong vòng 30 ngày nếu phát sinh lỗi
+            kỹ thuật.
+          </p>
+          <p>
+            🛡️ Bảo hành chính hãng toàn quốc với quy trình kiểm tra và tiếp nhận
+            minh bạch.
+          </p>
+          <p>
+            🏅 Cam kết sản phẩm chính hãng 100% cùng đầy đủ hóa đơn và bảo hành
+            điện tử.
+          </p>
+          <p>☎ Hotline: 1900 3252</p>
+        </div>
+      </aside>
+    </section>
+    <section class="product-spec-section">
+      <div class="spec-header">
+        <h2>Thông số sản phẩm</h2>
+        <button class="open-spec-modal" type="button">Xem tất cả ›</button>
+      </div>
+      <table class="product-spec-table"></table>
+    </section>
+    <section class="review-section">
+      <h2>Đánh giá sản phẩm</h2>
+      <div class="review-summary">
+        <div class="review-score-box">
+          <h3 class="review-average">0/5</h3>
+          <p class="review-count">0 lượt đánh giá</p>
+          <div class="review-stars"></div>
+          <button class="review-btn">Đánh giá sản phẩm</button>
+        </div>
+        <div class="review-bars"></div>
+      </div>
+      <div class="review-header">
+        <h3 class="comment-title">0 Bình luận</h3>
+        <div class="review-filter">
+          <button class="active" data-rating="all" type="button">Tất cả</button>
+          <button data-rating="5" type="button">5 ☆</button>
+          <button data-rating="4" type="button">4 ☆</button>
+          <button data-rating="3" type="button">3 ☆</button>
+          <button data-rating="2" type="button">2 ☆</button>
+          <button data-rating="1" type="button">1 ☆</button>
+        </div>
+      </div>
+      <div class="review-list"></div>
+      <div class="review-pagination"></div>
+    </section>
+  </main>
+  <div class="spec-modal" id="spec-modal">
+    <div class="spec-modal-content">
+      <div class="spec-modal-header">
+        <h2>Thông số kĩ thuật</h2>
+        <button class="close-spec-modal" type="button">×</button>
+      </div>
+      <div class="spec-tabs"></div>
+      <div class="spec-modal-body"></div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/shop.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Giỏ hàng</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/shop.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+
+  <body>
+    <!-- NAVBAR -->
+    <div class="navbar">
+      <div class="nav-inner">
+        <a href="/" class="logo">
+          <img src="{{ url_for('static', filename='img/Logo.jpg') }}" />
+          <span>Technova</span>
+        </a>
+
+        <div class="search-box">
+          <input type="text" placeholder="Bạn tìm gì..." />
+        </div>
+
+        <div class="nav-right">
+          {% if session.get("account_id") %}
+          <div class="account-dropdown">
+            <a href="/infor" class="nav-item login-item">
+              <img
+                src="{{ url_for('avatar', account_id=session.get('account_id')) }}"
+                class="header-avatar"
+              />
+
+              <span>
+                {% if session.get("gender") == "Nữ" %} C. {% else %} A. {% endif
+                %} {{ session.get("last_name") }}
+              </span>
+            </a>
+
+            <div class="account-menu">
+              <a href="/infor" class="account-menu-item"> Tài khoản của tôi </a>
+
+              <a href="#" class="account-menu-item"> Đơn mua </a>
+
+              <a href="/logout" class="account-menu-item"> Đăng xuất </a>
+            </div>
+          </div>
+
+          {% else %}
+
+          <a href="/signin" class="nav-item login-item">
+            <img src="{{ url_for('static', filename='img/user.png') }}" />
+            <span>Đăng nhập</span>
+          </a>
+
+          {% endif %}
+
+          <a href="/cart" class="nav-item icon-item">
+            <img src="{{ url_for('static', filename='img/cart.png') }}" />
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- MENU -->
+    <div class="sub-menu">
+      <span onclick="window.location.href = '/products?category=phone'"
+        >Điện thoại</span
+      >
+      <span onclick="window.location.href = '/products?category=tablet'"
+        >Máy tính bảng</span
+      >
+      <span onclick="window.location.href = '/products?category=laptop'"
+        >Laptop</span
+      >
+      <span onclick="window.location.href = '/products?category=ipad'"
+        >iPad</span
+      >
+      <span onclick="window.location.href = '/products?category=audio'"
+        >Tai nghe</span
+      >
+      <span onclick="window.location.href = '/products?category=accessory'"
+        >Phụ kiện</span
+      >
+      <span onclick="window.location.href = '/products?category=watch'"
+        >Đồng hồ</span
+      >
+      <span onclick="window.location.href = '/products?category=printer'"
+        >Màn hình, Máy in</span
+      >
+    </div>
+    <div class="cart-page">
+      <!-- GIỎ HÀNG CÓ SẢN PHẨM -->
+      <div class="cart-container">
+        <div class="cart-table-header">
+          <div class="cart-col check-col">
+            <input type="checkbox" id="select-all-top" />
+          </div>
+
+          <div class="cart-col product-col">Sản Phẩm</div>
+          <div class="cart-col quantity-col">Số Lượng</div>
+          <div class="cart-col price-col">Tạm Tính</div>
+          <div class="cart-col action-col">Thao Tác</div>
+        </div>
+
+        <div class="cart-list"></div>
+
+        <div class="cart-footer">
+          <div class="cart-footer-left">
+            <label class="select-all-bottom">
+              <input type="checkbox" id="select-all-bottom" />
+              <span>Chọn tất cả</span>
+            </label>
+
+            <button type="button" class="delete-selected-btn">
+              🗑
+              <span>Xóa các mục đã chọn</span>
+            </button>
+          </div>
+
+          <div class="cart-footer-right">
+            <p>
+              Tổng cộng
+              <span class="selected-count">(0 sản phẩm):</span>
+            </p>
+
+            <strong class="cart-total">0đ</strong>
+
+            <button type="button" class="checkout-btn">Mua hàng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- GIỎ HÀNG TRỐNG -->
+      <div class="cart-empty-page">
+        <div class="cart-empty-box">
+          <div class="cart-illustration">
+            <div class="cart-bg-shape"></div>
+
+            <div class="cart-table"></div>
+            <div class="cart-table-leg left"></div>
+            <div class="cart-table-leg right"></div>
+
+            <div class="cart-plant">
+              <div class="plant-pot"></div>
+              <div class="plant-leaf leaf-1"></div>
+              <div class="plant-leaf leaf-2"></div>
+              <div class="plant-leaf leaf-3"></div>
+            </div>
+
+            <div class="cart-clock">
+              <div class="clock-hand h1"></div>
+              <div class="clock-hand h2"></div>
+            </div>
+
+            <div class="basket">
+              <div class="basket-top"></div>
+
+              <div class="basket-body">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+
+              <div class="basket-handle handle-left"></div>
+              <div class="basket-handle handle-right"></div>
+
+              <div class="basket-dot dot-left"></div>
+              <div class="basket-dot dot-right"></div>
+            </div>
+
+            <div class="cart-ground"></div>
+          </div>
+
+          <h1>Giỏ hàng trống</h1>
+
+          <p class="cart-empty-desc">Không có sản phẩm nào trong giỏ hàng</p>
+
+          <a href="/" class="cart-home-btn"> Về trang chủ </a>
+        </div>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+  </body>
+</html>

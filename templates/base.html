@@ -1,229 +1,242 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <title>{% block title %}Technova{% endblock %}</title>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Technova{% endblock %}</title>
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    {% block extra_head %}{% endblock %}
+  </head>
 
-<body>
-
-  <!-- NAVBAR -->
-  <div class="navbar">
-    <div class="nav-inner">
-
-      <a href="/" class="logo">
-        <img src="{{ url_for('static', filename='img/Logo.jpg') }}">
-        <span>Technova</span>
-      </a>
-
-      <div class="search-box">
-        <input type="text" placeholder="Bạn tìm gì...">
-      </div>
-
-      <div class="nav-right">
-
-    {% if session.get("account_id") %}
-    <div class="account-dropdown">
-
-        <a href="/infor" class="nav-item login-item">
-            <img
-                src="{{ url_for('avatar', account_id=session.get('account_id')) }}"
-                class="header-avatar">
-
-            <span>
-            {% if session.get("gender") == "Nữ" %}
-                C.
-            {% else %}
-                A.
-            {% endif %}
-            {{ session.get("last_name") }}
-            </span>
-
+  <body>
+    <!-- NAVBAR -->
+    <div class="navbar">
+      <div class="nav-inner">
+        <a href="/" class="logo">
+          <img src="{{ url_for('static', filename='img/Logo.jpg') }}" />
+          <span>Technova</span>
         </a>
 
-        <div class="account-menu">
-            <a href="/infor" class="account-menu-item">
-                Tài khoản của tôi
-            </a>
-
-            <a href="#" class="account-menu-item">
-                Đơn mua
-            </a>
-
-            <a href="/logout" class="account-menu-item">
-                Đăng xuất
-            </a>
+        <div class="search-box">
+          <input type="text" placeholder="Bạn tìm gì..." />
         </div>
 
+        <div class="nav-right">
+          {% if session.get("account_id") %}
+          <div class="account-dropdown">
+            <a href="/infor" class="nav-item login-item">
+              <img
+                src="{{ url_for('avatar', account_id=session.get('account_id')) }}"
+                class="header-avatar"
+              />
+
+              <span>
+                {% if session.get("gender") == "Nữ" %} C. {% else %} A. {% endif
+                %} {{ session.get("last_name") }}
+              </span>
+            </a>
+
+            <div class="account-menu">
+              <a href="/infor" class="account-menu-item"> Tài khoản của tôi </a>
+
+              <a href="#" class="account-menu-item"> Đơn mua </a>
+
+              <a href="/logout" class="account-menu-item"> Đăng xuất </a>
+            </div>
+          </div>
+
+          {% else %}
+
+          <a href="/signin" class="nav-item login-item">
+            <img src="{{ url_for('static', filename='img/user.png') }}" />
+            <span>Đăng nhập</span>
+          </a>
+
+          {% endif %}
+
+          <a href="/cart" class="nav-item icon-item">
+            <img src="{{ url_for('static', filename='img/cart.png') }}" />
+          </a>
+        </div>
+      </div>
     </div>
 
-    {% else %}
-
-    <a href="/signin" class="nav-item login-item">
-        <img src="{{ url_for('static', filename='img/user.png') }}">
-        <span>Đăng nhập</span>
-    </a>
-
-    {% endif %}
-
-    <div class="nav-item icon-item">
-        <img src="{{ url_for('static', filename='img/cart.png') }}">
+    <!-- MENU -->
+    <div class="sub-menu">
+      <span onclick="window.location.href = '/products?category=phone'"
+        >Điện thoại</span
+      >
+      <span onclick="window.location.href = '/products?category=tablet'"
+        >Máy tính bảng</span
+      >
+      <span onclick="window.location.href = '/products?category=laptop'"
+        >Laptop</span
+      >
+      <span onclick="window.location.href = '/products?category=ipad'"
+        >iPad</span
+      >
+      <span onclick="window.location.href = '/products?category=audio'"
+        >Tai nghe</span
+      >
+      <span onclick="window.location.href = '/products?category=accessory'"
+        >Phụ kiện</span
+      >
+      <span onclick="window.location.href = '/products?category=watch'"
+        >Đồng hồ</span
+      >
+      <span onclick="window.location.href = '/products?category=printer'"
+        >Màn hình, Máy in</span
+      >
     </div>
 
-</div>
+    <!-- CONTENT -->
+    <div class="content">{% block content %}{% endblock %}</div>
 
-    </div>
-  </div>
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-main">
+          <div class="footer-col footer-brand">
+            <h2>Technova</h2>
 
-  <!-- MENU -->
-  <div class="sub-menu">
-    <span onclick="window.location.href='/phones'">Điện thoại</span>
-    <span onclick="window.location.href='/tablets'">Máy tính bảng</span>
-    <span onclick="window.location.href='/laptops'">Laptop</span>
-    <span onclick="window.location.href='/ipads'">iPad</span>
-    <span onclick="window.location.href='/headphones'">Tai nghe</span>
-    <span onclick="window.location.href='/accessories'">Phụ kiện</span>
-    <span onclick="window.location.href='/watches'">Đồng hồ</span>
-    <span onclick="window.location.href='/monitors'">Màn hình, Máy in</span>
-  </div>
-
-  <!-- CONTENT -->
-  <div class="content">
-    {% block content %}{% endblock %}
-  </div>
-
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="footer-inner">
-
-      <div class="footer-main">
-
-        <div class="footer-col footer-brand">
-          <h2>Technova</h2>
-
-          <p class="footer-desc">
-            Đồng hành cùng bạn trên hành trình khám phá và trải nghiệm những sản phẩm công nghệ chính hãng, chất lượng và xu hướng mới nhất
-          </p>
-
-          <div class="footer-address">
-            <img
-              src="{{ url_for('static', filename='img/location.png') }}"
-              class="footer-location-icon">
-            <p>
-              Tòa nhà 43C, 123 Đường Cách Mạng<br>
-              Tháng 8, Quận Bình Thủy, Thành phố<br>
-              Cần Thơ
+            <p class="footer-desc">
+              Đồng hành cùng bạn trên hành trình khám phá và trải nghiệm những
+              sản phẩm công nghệ chính hãng, chất lượng và xu hướng mới nhất
             </p>
+
+            <div class="footer-address">
+              <img
+                src="{{ url_for('static', filename='img/location.png') }}"
+                class="footer-location-icon"
+              />
+              <p>
+                Tòa nhà 43C, 123 Đường Cách Mạng<br />
+                Tháng 8, Quận Bình Thủy, Thành phố<br />
+                Cần Thơ
+              </p>
+            </div>
+          </div>
+
+          <div class="footer-col footer-support">
+            <h3>TỔNG ĐÀI HỖ TRỢ</h3>
+
+            <div class="footer-contact-item">
+              <img
+                src="{{ url_for('static', filename='img/phone.png') }}"
+                class="footer-contact-icon"
+              />
+              <span>1900 1987</span>
+            </div>
+
+            <div class="footer-contact-item">
+              <img
+                src="{{ url_for('static', filename='img/support_footer.png') }}"
+                class="footer-contact-icon"
+              />
+              <span>0901068175</span>
+            </div>
+
+            <div class="footer-contact-item">
+              <img
+                src="{{ url_for('static', filename='img/mail.png') }}"
+                class="footer-contact-icon"
+              />
+              <span>support@technova.com</span>
+            </div>
+          </div>
+
+          <div class="footer-col footer-policy">
+            <h3>CHÍNH SÁCH</h3>
+
+            <a href="#">Chính sách bảo mật</a>
+            <a href="#">Chính sách đổi trả</a>
+            <a href="#">Chính sách vận chuyển</a>
+            <a href="#">Điều khoản & dịch vụ</a>
+          </div>
+
+          <div class="footer-col footer-connect">
+            <h3>KẾT NỐI VỚI TECHNOVA</h3>
+
+            <div class="footer-socials">
+              <a href="#" class="footer-social-link">
+                <img
+                  src="{{ url_for('static', filename='img/facebook.png') }}"
+                  class="footer-social-icon"
+                />
+              </a>
+
+              <a href="#" class="footer-social-link">
+                <img
+                  src="{{ url_for('static', filename='img/instagram.png') }}"
+                  class="footer-social-icon"
+                />
+              </a>
+
+              <a href="#" class="footer-social-link">
+                <img
+                  src="{{ url_for('static', filename='img/youtube.png') }}"
+                  class="footer-social-icon"
+                />
+              </a>
+            </div>
+
+            <p class="footer-news-title">Đăng ký nhận bản tin</p>
+
+            <div class="footer-email">
+              <span>Email của bạn</span>
+              <span class="footer-arrow">→</span>
+            </div>
           </div>
         </div>
 
-        <div class="footer-col footer-support">
-          <h3>TỔNG ĐÀI HỖ TRỢ</h3>
-
-          <div class="footer-contact-item">
-            <img src="{{ url_for('static', filename='img/phone.png') }}"
-              class="footer-contact-icon">
-            <span>1900 1987</span>
-          </div>
-
-          <div class="footer-contact-item">
-            <img src="{{ url_for('static', filename='img/support_footer.png') }}"
-              class="footer-contact-icon">
-            <span>0901068175</span>
-          </div>
-
-          <div class="footer-contact-item">
-            <img src="{{ url_for('static', filename='img/mail.png') }}"
-              class="footer-contact-icon">
-            <span>support@technova.com</span>
-          </div>
+        <div class="footer-bottom">
+          © 2024 TECHNOVA. ALL RIGHTS RESERVED. ARCHITECTURAL PRECISION IN
+          TECHNOLOGY.
         </div>
-
-        <div class="footer-col footer-policy">
-          <h3>CHÍNH SÁCH</h3>
-
-          <a href="#">Chính sách bảo mật</a>
-          <a href="#">Chính sách đổi trả</a>
-          <a href="#">Chính sách vận chuyển</a>
-          <a href="#">Điều khoản & dịch vụ</a>
-        </div>
-
-        <div class="footer-col footer-connect">
-          <h3>KẾT NỐI VỚI TECHNOVA</h3>
-
-          <div class="footer-socials">
-            <a href="#" class="footer-social-link">
-              <img src="{{ url_for('static', filename='img/facebook.png') }}"
-                class="footer-social-icon">
-            </a>
-
-            <a href="#" class="footer-social-link">
-              <img src="{{ url_for('static', filename='img/instagram.png') }}"
-                class="footer-social-icon">
-            </a>
-
-            <a href="#" class="footer-social-link">
-              <img src="{{ url_for('static', filename='img/youtube.png') }}"
-                class="footer-social-icon">
-            </a>
-          </div>
-
-          <p class="footer-news-title">Đăng ký nhận bản tin</p>
-
-          <div class="footer-email">
-            <span>Email của bạn</span>
-            <span class="footer-arrow">→</span>
-          </div>
-        </div>
-
       </div>
+    </footer>
 
-      <div class="footer-bottom">
-        © 2024 TECHNOVA. ALL RIGHTS RESERVED. ARCHITECTURAL PRECISION IN TECHNOLOGY.
-      </div>
+    <script>
+      window.addEventListener("scroll", function () {
+        const subMenu = document.querySelector(".sub-menu");
+        const breadcrumb = document.querySelector(".breadcrumb");
 
-    </div>
-  </footer>
+        if (window.scrollY > 81) {
+          subMenu.classList.add("hide-sub-menu");
 
-  <script>
-    window.addEventListener("scroll", function () {
-      const subMenu = document.querySelector(".sub-menu");
-      const breadcrumb = document.querySelector(".breadcrumb");
-
-      if (window.scrollY > 81) {
-        subMenu.classList.add("hide-sub-menu");
-
-        if (breadcrumb) {
-          breadcrumb.classList.add("hide-breadcrumb");
-        }
-      } else {
-        subMenu.classList.remove("hide-sub-menu");
-
-        if (breadcrumb) {
-          breadcrumb.classList.remove("hide-breadcrumb");
-        }
-      }
-    });
-  </script>
-
-  <script>
-    const passwordInput = document.getElementById("password");
-    const eyeBtn = document.getElementById("togglePassword");
-
-    if (passwordInput && eyeBtn) {
-      eyeBtn.addEventListener("click", function () {
-        if (passwordInput.type === "password") {
-          passwordInput.type = "text";
-          eyeBtn.src = "{{ url_for('static', filename='img/view-eye.png') }}";
+          if (breadcrumb) {
+            breadcrumb.classList.add("hide-breadcrumb");
+          }
         } else {
-          passwordInput.type = "password";
-          eyeBtn.src = "{{ url_for('static', filename='img/hide-eye.png') }}";
+          subMenu.classList.remove("hide-sub-menu");
+
+          if (breadcrumb) {
+            breadcrumb.classList.remove("hide-breadcrumb");
+          }
         }
       });
-    }
-  </script>
+    </script>
 
-</body>
+    <script>
+      const passwordInput = document.getElementById("password");
+      const eyeBtn = document.getElementById("togglePassword");
+
+      if (passwordInput && eyeBtn) {
+        eyeBtn.addEventListener("click", function () {
+          if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            eyeBtn.src = "{{ url_for('static', filename='img/view-eye.png') }}";
+          } else {
+            passwordInput.type = "password";
+            eyeBtn.src = "{{ url_for('static', filename='img/hide-eye.png') }}";
+          }
+        });
+      }
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+  </body>
 </html>

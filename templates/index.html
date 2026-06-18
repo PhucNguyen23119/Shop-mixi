@@ -1,28 +1,41 @@
-{% extends "base.html" %}
-
-{% block title %}Trang chủ{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Trang chủ{% endblock %} {% block
+extra_head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/shop.css') }}"
+/>
+{% endblock %} {% block content %}
 
 <!-- 🔥 HERO -->
 <div class="hero-text">
-  <div class="hero-title">
-    Hệ sinh thái công nghệ dành riêng cho bạn
-  </div>
+  <div class="hero-title">Hệ sinh thái công nghệ dành riêng cho bạn</div>
 
   <div class="hero-desc">
-    Mua sắm thiết bị chính hãng, phụ kiện cao cấp và trải nghiệm hiện đại tại Technova.
+    Mua sắm thiết bị chính hãng, phụ kiện cao cấp và trải nghiệm hiện đại tại
+    Technova.
   </div>
 </div>
 
 <!-- 🔥 VIDEO -->
-<div style="display:flex; justify-content:center;">
-  <div style="width:900px;">
-    <div style="position:relative; width:900px; height:500px; border-radius:20px; overflow:hidden; background:black;">
-
-      <video id="videoPlayer" muted autoplay playsinline
-        style="width:100%; height:100%; object-fit:cover;">
-      </video>
+<div style="display: flex; justify-content: center">
+  <div style="width: 900px">
+    <div
+      style="
+        position: relative;
+        width: 900px;
+        height: 500px;
+        border-radius: 20px;
+        overflow: hidden;
+        background: black;
+      "
+    >
+      <video
+        id="videoPlayer"
+        muted
+        autoplay
+        playsinline
+        style="width: 100%; height: 100%; object-fit: cover"
+      ></video>
 
       <!-- LEFT -->
       <div onclick="prevVideo()" class="nav-btn nav-left">
@@ -35,37 +48,45 @@
       </div>
 
       <!-- PLAY BUTTON -->
-      <div onclick="togglePlay()" style="
-        position:absolute; right:20px; bottom:20px;
-        width:50px;height:50px;
-        background:rgba(0,0,0,0.4);
-        border-radius:50%;
-        display:flex;align-items:center;justify-content:center;
-        cursor:pointer;">
-        <span id="playIcon" style="color:white;">❚❚</span>
+      <div
+        onclick="togglePlay()"
+        style="
+          position: absolute;
+          right: 20px;
+          bottom: 20px;
+          width: 50px;
+          height: 50px;
+          background: rgba(0, 0, 0, 0.4);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+        "
+      >
+        <span id="playIcon" style="color: white">❚❚</span>
       </div>
-
     </div>
 
     <!-- DOTS -->
-    <div id="dots" style="margin-top:14px; display:flex; gap:8px;"></div>
+    <div id="dots" style="margin-top: 14px; display: flex; gap: 8px"></div>
   </div>
 </div>
 
 <!-- 🔥 BANNER -->
 <div class="samsung-banner">
-  <img src="{{ url_for('static', filename='img/Banner Samsung S26.jpg') }}">
+  <img src="{{ url_for('static', filename='img/Banner Samsung S26.jpg') }}" />
 
   <div class="banner-content">
     <div class="banner-tag">FLAGSHIP 2026</div>
 
     <div class="banner-title">
-      Trải nghiệm Đẳng<br>
+      Trải nghiệm Đẳng<br />
       cấp Công nghệ
     </div>
 
     <div class="banner-desc">
-      Khám phá sức mạnh Galaxy S26 Ultra với thiết kế cao cấp,<br>
+      Khám phá sức mạnh Galaxy S26 Ultra với thiết kế cao cấp,<br />
       AI đột phá và camera siêu nét hàng đầu.
     </div>
 
@@ -75,10 +96,9 @@
 
 <!-- 🔥 SERVICE FEATURES -->
 <div class="service-features">
-
   <div class="feature-item">
     <div class="icon-box">
-      <img src="{{ url_for('static', filename='img/verify.png') }}">
+      <img src="{{ url_for('static', filename='img/verify.png') }}" />
     </div>
     <div>
       <div class="feature-title">100% Chính hãng</div>
@@ -88,7 +108,7 @@
 
   <div class="feature-item">
     <div class="icon-box">
-      <img src="{{ url_for('static', filename='img/check.png') }}">
+      <img src="{{ url_for('static', filename='img/check.png') }}" />
     </div>
     <div>
       <div class="feature-title">Đổi trả 30 ngày</div>
@@ -98,7 +118,7 @@
 
   <div class="feature-item">
     <div class="icon-box">
-      <img src="{{ url_for('static', filename='img/thunder.png') }}">
+      <img src="{{ url_for('static', filename='img/thunder.png') }}" />
     </div>
     <div>
       <div class="feature-title">Giao nhanh 2h</div>
@@ -108,130 +128,199 @@
 
   <div class="feature-item">
     <div class="icon-box">
-      <img src="{{ url_for('static', filename='img/support.png') }}">
+      <img src="{{ url_for('static', filename='img/support.png') }}" />
     </div>
     <div>
       <div class="feature-title">Hỗ trợ 24/7</div>
       <div class="feature-desc">Đội ngũ chuyên gia tận tâm</div>
     </div>
   </div>
+</div>
 
+<!-- 🛒 SHOP SECTIONS - thêm từ bài 2 -->
+<div class="shop-page">
+  <section aria-labelledby="flash-sale-title" class="flash-sale">
+    <header class="flash-header">
+      <h2 id="flash-sale-title">⚡ Flash Sale</h2>
+      <p>
+        Nhanh lên! Flash Sale kết thúc sau:
+
+        <time id="countdown"> 04h 00m 00s </time>
+      </p>
+    </header>
+    <div class="flash-slider">
+      <button class="slider-btn prev-btn" type="button">❮</button>
+      <section
+        aria-label="Danh sách sản phẩm Flash Sale"
+        class="flash-products"
+      ></section>
+      <button class="slider-btn next-btn" type="button">❯</button>
+    </div>
+  </section>
+  <section class="brand-section">
+    <h2 class="new-gen-title">
+      <span> </span>
+      Mua sắm theo thương hiệu.
+    </h2>
+    <div class="brand-list">
+      <a class="brand-card" href="/products?brand=Apple">
+        <img
+          alt="Apple"
+          class="brand-logo"
+          src="/static/img/Apple_logo_black.svg"
+        />
+      </a>
+      <a class="brand-card samsung" href="/products?brand=Samsung">SAMSUNG</a>
+      <a class="brand-card asus" href="/products?brand=ASUS">ASUS</a>
+      <a class="brand-card" href="/products?brand=Dell">
+        <span class="dell-logo">DELL</span>
+      </a>
+    </div>
+  </section>
+  <section class="new-gen-section">
+    <h2 class="new-gen-title">
+      <span>Thế hệ mới nhất.</span>
+      Xem ngay có gì mới.
+    </h2>
+    <div class="new-gen-slider">
+      <button class="slider-btn new-prev-btn" type="button">❮</button>
+      <div class="new-gen-list"></div>
+      <button class="slider-btn new-next-btn" type="button">❯</button>
+    </div>
+  </section>
+  <section class="promo-section">
+    <div class="promo-grid">
+      <a class="promo-banner" href="#">
+        <img alt="Banner quảng cáo 1" src="/static/img/bannerip17.jpg" />
+      </a>
+      <a class="promo-banner" href="#">
+        <img alt="Banner quảng cáo 2" src="/static/img/banner2.jpg" />
+      </a>
+    </div>
+  </section>
+  <section class="featured-section">
+    <header class="featured-header">
+      <h2>Sản phẩm nổi bật</h2>
+    </header>
+    <section class="featured-products"></section>
+  </section>
 </div>
 
 <!-- 🔥 SCRIPT -->
 <script>
-window.onload = function () {
+  window.onload = function () {
+    let videos = [
+      "/static/video/Video 1 Main.mp4",
+      "/static/video/Video 2 Main.mp4",
+      "/static/video/Video 3 Main.mp4",
+      "/static/video/Video 4 Main.mp4",
+      "/static/video/Video 5 Main.mp4",
+    ];
 
-  let videos = [
-    "/static/video/Video 1 Main.mp4",
-    "/static/video/Video 2 Main.mp4",
-    "/static/video/Video 3 Main.mp4",
-    "/static/video/Video 4 Main.mp4",
-    "/static/video/Video 5 Main.mp4"
-  ];
+    let current = 0;
+    let player = document.getElementById("videoPlayer");
+    let playIcon = document.getElementById("playIcon");
 
-  let current = 0;
-  let player = document.getElementById("videoPlayer");
-  let playIcon = document.getElementById("playIcon");
-
-  function updatePlayIcon() {
-    if (player.paused) {
-      playIcon.innerText = "▶";
-    } else {
-      playIcon.innerText = "❚❚";
+    function updatePlayIcon() {
+      if (player.paused) {
+        playIcon.innerText = "▶";
+      } else {
+        playIcon.innerText = "❚❚";
+      }
     }
-  }
 
-  function loadVideo(i) {
-    current = i;
+    function loadVideo(i) {
+      current = i;
 
-    player.src = videos[current];
-    player.muted = true;
-    player.load();
+      player.src = videos[current];
+      player.muted = true;
+      player.load();
 
-    player.play()
-      .then(() => {
-        updatePlayIcon();
-      })
-      .catch(() => {
-        updatePlayIcon();
-      });
-
-    updateDots();
-  }
-
-  window.nextVideo = function () {
-    loadVideo((current + 1) % videos.length);
-  }
-
-  window.prevVideo = function () {
-    loadVideo((current - 1 + videos.length) % videos.length);
-  }
-
-  window.togglePlay = function () {
-    if (player.paused) {
-      player.play()
+      player
+        .play()
         .then(() => {
           updatePlayIcon();
         })
         .catch(() => {
           updatePlayIcon();
         });
-    } else {
-      player.pause();
-      updatePlayIcon();
+
+      updateDots();
     }
-  }
 
-  function initDots() {
-    let d = document.getElementById("dots");
+    window.nextVideo = function () {
+      loadVideo((current + 1) % videos.length);
+    };
 
-    d.style.display = "flex";
-    d.style.justifyContent = "center";
-    d.style.alignItems = "center";
-    d.style.gap = "8px";
-    d.style.marginTop = "12px";
+    window.prevVideo = function () {
+      loadVideo((current - 1 + videos.length) % videos.length);
+    };
 
-    d.innerHTML = "";
-
-    for (let i = 0; i < videos.length; i++) {
-      let dot = document.createElement("div");
-      dot.className = "dot";
-
-      dot.addEventListener("click", () => {
-        loadVideo(i);
-      });
-
-      d.appendChild(dot);
-    }
-  }
-
-  function updateDots() {
-    document.querySelectorAll(".dot").forEach((dot, i) => {
-
-      dot.style.height = "4px";
-      dot.style.borderRadius = "999px";
-      dot.style.cursor = "pointer";
-      dot.style.transition = "all .25s ease";
-
-      if (i === current) {
-        dot.style.width = "40px";
-        dot.style.background = "#777";
+    window.togglePlay = function () {
+      if (player.paused) {
+        player
+          .play()
+          .then(() => {
+            updatePlayIcon();
+          })
+          .catch(() => {
+            updatePlayIcon();
+          });
       } else {
-        dot.style.width = "20px";
-        dot.style.background = "#d6d6d6";
+        player.pause();
+        updatePlayIcon();
       }
+    };
 
-    });
-  }
+    function initDots() {
+      let d = document.getElementById("dots");
 
-  player.addEventListener("play", updatePlayIcon);
-  player.addEventListener("pause", updatePlayIcon);
-  player.addEventListener("ended", updatePlayIcon);
+      d.style.display = "flex";
+      d.style.justifyContent = "center";
+      d.style.alignItems = "center";
+      d.style.gap = "8px";
+      d.style.marginTop = "12px";
 
-  initDots();
-  loadVideo(0);
-};
+      d.innerHTML = "";
+
+      for (let i = 0; i < videos.length; i++) {
+        let dot = document.createElement("div");
+        dot.className = "dot";
+
+        dot.addEventListener("click", () => {
+          loadVideo(i);
+        });
+
+        d.appendChild(dot);
+      }
+    }
+
+    function updateDots() {
+      document.querySelectorAll(".dot").forEach((dot, i) => {
+        dot.style.height = "4px";
+        dot.style.borderRadius = "999px";
+        dot.style.cursor = "pointer";
+        dot.style.transition = "all .25s ease";
+
+        if (i === current) {
+          dot.style.width = "40px";
+          dot.style.background = "#777";
+        } else {
+          dot.style.width = "20px";
+          dot.style.background = "#d6d6d6";
+        }
+      });
+    }
+
+    player.addEventListener("play", updatePlayIcon);
+    player.addEventListener("pause", updatePlayIcon);
+    player.addEventListener("ended", updatePlayIcon);
+
+    initDots();
+    loadVideo(0);
+  };
 </script>
 
+{% endblock %} {% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/shop.js') }}"></script>
 {% endblock %}
