@@ -331,7 +331,73 @@ OUTER APPLY (
     ORDER BY c.display_order
 ) c;
 GO
+CREATE TABLE orders (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    order_code NVARCHAR(30) NOT NULL,
+    account_id INT NOT NULL,
+    receive_type NVARCHAR(30),
+    payment_method NVARCHAR(30),
+    customer_name NVARCHAR(100),
+    customer_phone NVARCHAR(20),
+    address_detail NVARCHAR(255),
+    city NVARCHAR(100),
+    district NVARCHAR(100),
+    ward NVARCHAR(100),
+    subtotal INT,
+    shipping_fee INT,
+    discount INT,
+    total INT,
+    status NVARCHAR(50) DEFAULT N'Chờ xử lý',
+    created_at DATETIME DEFAULT GETDATE()
+);
 
+CREATE TABLE order_items (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    order_id INT NOT NULL,
+    product_id INT,
+    product_name NVARCHAR(255),
+    color NVARCHAR(100),
+    storage NVARCHAR(100),
+    quantity INT,
+    price INT,
+    total INT,
+    image NVARCHAR(MAX),
+    FOREIGN KEY (order_id) REFERENCES orders(id)
+);
+CREATE TABLE orders (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    order_code NVARCHAR(30) NOT NULL,
+    account_id INT NOT NULL,
+    receive_type NVARCHAR(30),
+    payment_method NVARCHAR(30),
+    customer_name NVARCHAR(100),
+    customer_phone NVARCHAR(20),
+    address_detail NVARCHAR(255),
+    city NVARCHAR(100),
+    district NVARCHAR(100),
+    ward NVARCHAR(100),
+    subtotal INT,
+    shipping_fee INT,
+    discount INT,
+    total INT,
+    status NVARCHAR(50) DEFAULT N'Chờ xử lý',
+    created_at DATETIME DEFAULT GETDATE()
+);
+
+CREATE TABLE order_items (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    order_id INT NOT NULL,
+    product_id INT,
+    product_name NVARCHAR(255),
+    color NVARCHAR(100),
+    storage NVARCHAR(100),
+    quantity INT,
+    price INT,
+    total INT,
+    image NVARCHAR(MAX),
+    FOREIGN KEY (order_id) REFERENCES orders(id)
+);
+SELECT TOP 10 * FROM orders ORDER BY id DESC;
 /* ==========================================================
    4. DỮ LIỆU ĐIỆN THOẠI CHO BÀI 1
    ========================================================== */
@@ -692,7 +758,7 @@ VALUES (
     @ProductId,
     N'Đen',
     N'#000000',
-    N'images/iPhone_17e-2_2.webp',
+    N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-black-1-639174880447022915-750x500.jpg',
     2
 );
 SET @ColorBlackId = SCOPE_IDENTITY();
@@ -708,7 +774,7 @@ VALUES (
     @ProductId,
     N'Trắng',
     N'#ffffff',
-    N'images/iPhone_17e-2-2_2.webp',
+    N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-white-1-639174880271305093-750x500.jpg',
     3
 );
 SET @ColorWhiteId = SCOPE_IDENTITY();
@@ -723,10 +789,12 @@ INSERT INTO product_color_images (
 )
 VALUES
     (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342692/iphone-17e-pink-1-639095328411069989-750x500.jpg', 1),
-    (@ProductId, @ColorPinkId, N'images/iphone-17e-pink1.jpg', 2),
-    (@ProductId, @ColorPinkId, N'images/iphone-17e-pink2.jpg', 3),
-    (@ProductId, @ColorPinkId, N'images/iphone-17e-pink3.jpg', 4);
-
+    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-2-639174879985196876-750x500.jpg', 2),
+    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-3-639174879992012433-750x500.jpg', 3),
+    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-4-639174879997703770-750x500.jpg', 4),
+    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-5-639174880003681348-750x500.jpg', 5),
+    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-6-639174880010400520-750x500.jpg', 6),
+    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-8-639174880024288326-750x500.jpg', 7);
 /* Gallery màu 2 */
 
 INSERT INTO product_color_images (
@@ -736,10 +804,13 @@ INSERT INTO product_color_images (
     display_order
 )
 VALUES
-    (@ProductId, @ColorBlackId, N'images/iPhone_17e-2_2.webp', 1),
-    (@ProductId, @ColorBlackId, N'images/iphone-17e-black-2-639081454471266575-750x500.jpg', 2),
-    (@ProductId, @ColorBlackId, N'images/iphone-17e-black-3-639081454477150583-750x500.jpg', 3),
-    (@ProductId, @ColorBlackId, N'images/iphone-17e-black1.jpg', 4);
+    (@ProductId, @ColorBlackId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-black-1-639174880447022915-750x500.jpg', 1),
+    (@ProductId, @ColorBlackId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-black-2-639174880454423590-750x500.jpg', 2),
+    (@ProductId, @ColorBlackId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-black-3-639174880462321235-750x500.jpg', 3),
+    (@ProductId, @ColorBlackId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-black-4-639174880468448735-750x500.jpg', 4),
+    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-5-639174880003681348-750x500.jpg', 5),
+    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-6-639174880010400520-750x500.jpg', 6),
+    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-black-8-639174880494309952-750x500.jpg', 7);
 
 /* Gallery màu 3 */
 
@@ -750,7 +821,13 @@ INSERT INTO product_color_images (
     display_order
 )
 VALUES
-    (@ProductId, @ColorWhiteId, N'images/iPhone_17e-2-2_2.webp', 1);
+    (@ProductId, @ColorWhiteId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-white-1-639174880271305093-750x500.jpg', 1),
+    (@ProductId, @ColorWhiteId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-white-2-639174880277679447-750x500.jpg', 2),
+    (@ProductId, @ColorWhiteId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-white-3-639174880284814639-750x500.jpg', 3),
+    (@ProductId, @ColorWhiteId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-white-4-639174880291739528-750x500.jpg', 4),
+    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-5-639174880003681348-750x500.jpg', 5),
+    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-6-639174880010400520-750x500.jpg', 6),
+    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-white-8-639174880317882892-750x500.jpg', 7);
 
 /* ==========================================================
    THÔNG SỐ KỸ THUẬT
@@ -777,7 +854,7 @@ SET @GroupId = SCOPE_IDENTITY();
 
 INSERT INTO product_spec_items (group_id, label, value, display_order)
 VALUES
-    (@GroupId, N'Camera sau', N'12MP, chống rung quang học OIS', 1),
+    (@GroupId, N'Camera sau', N'48 MP, chống rung quang học OIS', 1),
     (@GroupId, N'Camera trước', N'12MP, khẩu độ f/1.9', 2),
     (@GroupId, N'Quay video', N'4K@30fps, Full HD 1080p', 3),
     (@GroupId, N'Tính năng camera', N'HDR, lấy nét tự động, panorama, chống rung điện tử', 4);
@@ -789,7 +866,7 @@ SET @GroupId = SCOPE_IDENTITY();
 
 INSERT INTO product_spec_items (group_id, label, value, display_order)
 VALUES
-    (@GroupId, N'Chipset', N'Apple A15 Bionic', 1),
+    (@GroupId, N'Chipset', N'Apple A19 6 nhân', 1),
     (@GroupId, N'GPU', N'Apple GPU', 2);
 
 /* Giao tiếp & kết nối */
@@ -799,9 +876,9 @@ SET @GroupId = SCOPE_IDENTITY();
 
 INSERT INTO product_spec_items (group_id, label, value, display_order)
 VALUES
-    (@GroupId, N'Công nghệ NFC', N'Không', 1),
-    (@GroupId, N'Thẻ SIM', N'1 Nano-SIM', 2),
-    (@GroupId, N'GPS', N'A-GPS, GLONASS', 3);
+    (@GroupId, N'Công nghệ NFC', N'Có', 1),
+    (@GroupId, N'Thẻ SIM', N'1 Nano SIM & 1 eSIM', 2),
+    (@GroupId, N'GPS', N'GPS, GLONASS', 3);
 
 /* RAM & Bộ nhớ */
 INSERT INTO product_spec_groups (product_id, title, display_order)
@@ -820,7 +897,7 @@ SET @GroupId = SCOPE_IDENTITY();
 
 INSERT INTO product_spec_items (group_id, label, value, display_order)
 VALUES
-    (@GroupId, N'Hệ điều hành', N'iOS 10', 1);
+    (@GroupId, N'Hệ điều hành', N'iOS 26', 1);
 
 /* Kích thước & trọng lượng */
 INSERT INTO product_spec_groups (product_id, title, display_order)
@@ -829,8 +906,8 @@ SET @GroupId = SCOPE_IDENTITY();
 
 INSERT INTO product_spec_items (group_id, label, value, display_order)
 VALUES
-    (@GroupId, N'Kích thước', N'138.3 x 67.1 x 7.1 mm', 1),
-    (@GroupId, N'Trọng lượng', N'138 g', 2);
+    (@GroupId, N'Kích thước', N'Dài 146.7 mm - Ngang 71.5 mm - Dày 7.8 mm', 1),
+    (@GroupId, N'Trọng lượng', N'Nặng 170 g', 2);
 
 /* Kháng nước */
 INSERT INTO product_spec_groups (product_id, title, display_order)
@@ -848,8 +925,8 @@ SET @GroupId = SCOPE_IDENTITY();
 
 INSERT INTO product_spec_items (group_id, label, value, display_order)
 VALUES
-    (@GroupId, N'Dung lượng pin', N'5960 mAh', 1),
-    (@GroupId, N'Công nghệ sạc', N'Sạc tiêu chuẩn 100W', 2);
+    (@GroupId, N'Dung lượng pin', N'~4.005 mAh (26 Giờ)', 1),
+    (@GroupId, N'Công nghệ sạc', N'Sạc tiêu chuẩn 20 W', 2);
 
 /* Cảm biến & tính năng đặc biệt */
 INSERT INTO product_spec_groups (product_id, title, display_order)
@@ -1167,3 +1244,23 @@ SELECT id, name, brand, category FROM products;
 GO
 SELECT name 
 FROM sys.databases;
+SELECT
+    id,
+    username,
+    email,
+    phone,
+    role,
+    status
+FROM accounts
+SELECT id, username, email, phone, role, status
+FROM accounts
+ORDER BY id DESC;
+SELECT
+    a.id,
+    a.email,
+    a.phone,
+    p.full_name
+FROM accounts a
+JOIN customer_profiles p
+    ON a.id = p.account_id
+ORDER BY a.id DESC;

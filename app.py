@@ -3,6 +3,7 @@ import pyodbc
 import hashlib
 import os
 import tempfile
+import re
 
 app = Flask(__name__)
 app.secret_key = "technova_secret_key"
@@ -11,7 +12,7 @@ app.secret_key = "technova_secret_key"
 def get_conn():
     return pyodbc.connect(
         "DRIVER={ODBC Driver 17 for SQL Server};"
-        r"SERVER=DESKTOP-THU75VC\SQLEXPRESS;"
+        r"SERVER=DESKTOP-7A2RI7P\SQLEXPRESS;"
         "DATABASE=Technova;"
         "Trusted_Connection=yes;"
     )
@@ -22,7 +23,7 @@ def get_conn():
 # Nếu bạn đã gộp tất cả bảng vào cùng database, đổi product_database thành "Technova1".
 # =========================
 PRODUCT_DB_CONFIG = {
-    "server": r"DESKTOP-THU75VC\SQLEXPRESS",
+    "server": r"DESKTOP-7A2RI7P\SQLEXPRESS",
     "database": "Technova",
     "driver": "{ODBC Driver 17 for SQL Server}"
 }
@@ -60,6 +61,14 @@ def get_last_name(full_name):
 def avatar(account_id):
     conn = get_conn()
     cursor = conn.cursor()
+
+    def parse_int(value):
+        try:
+            s = str(value or "")
+            digits = re.sub(r"[^\d]", "", s)
+            return int(digits) if digits else 0
+        except Exception:
+            return 0
 
     cursor.execute("""
         SELECT avatar_data, avatar_mime
@@ -175,17 +184,24 @@ def signin():
 
         # Không đăng nhập ngay tại đây
         # Chỉ lưu tạm thông tin đăng nhập để chờ OTP
-        session["pending_signin"] = {
-            "account_id": user[0],
-            "email": user[1],
-            "phone": user[2],
-            "full_name": user[3],
-            "last_name": get_last_name(user[3]),
-            "gender": user[4]
-        }
+        # session["pending_signin"] = {
+        #     "account_id": user[0],
+        #     "email": user[1],
+        #     "phone": user[2],
+        #     "full_name": user[3],
+        #     "last_name": get_last_name(user[3]),
+        #     "gender": user[4]
+        # }
 
-        return redirect("/otp?from=signin")
+        # return redirect("/otp?from=signin")
+        session["account_id"] = user[0]
+        session["email"] = user[1]
+        session["phone"] = user[2]
+        session["full_name"] = user[3]
+        session["last_name"] = get_last_name(user[3])
+        session["gender"] = user[4]
 
+        return redirect("/")
     return render_template("signin.html", error_message=error_message)
 
 
@@ -951,6 +967,185 @@ def verify_infor_save_otp():
 
     return redirect("/infor")
 
+
+@app.route("/orders")
+def orders():
+    if not session.get("account_id"):
+        return redirect("/signin")
+
+    def money_to_int(value):
+        try:
+            return int(value or 0)
+        except Exception:
+            return 0
+
+    def format_vnd(value):
+        return "{:,.0f}đ".format(money_to_int(value)).replace(",", ".")
+
+    conn = get_conn()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT id, order_code, receive_type, payment_method,
+                   customer_name, customer_phone,
+                   address_detail, city, district, ward,
+                   subtotal, shipping_fee, discount, total,
+                   status, created_at
+            FROM orders
+            WHERE account_id = ?
+            ORDER BY created_at DESC
+        """, (session["account_id"],))
+
+        columns = [column[0] for column in cursor.description]
+        orders_list = []
+
+        for row in cursor.fetchall():
+            order = dict(zip(columns, row))
+            order_id = order["id"]
+
+            created_at = order.get("created_at")
+            if created_at:
+                if hasattr(created_at, "strftime"):
+                    order["formatted_date"] = created_at.strftime("%d/%m/%Y %H:%M")
+                    order["created_at"] = created_at.strftime("%Y-%m-%d %H:%M:%S")
+                else:
+                    order["formatted_date"] = str(created_at)
+                    order["created_at"] = str(created_at)
+            else:
+                order["formatted_date"] = ""
+                order["created_at"] = ""
+
+            # Convert Decimal sang int để orders|tojson không lỗi
+            order["subtotal"] = money_to_int(order.get("subtotal"))
+            order["shipping_fee"] = money_to_int(order.get("shipping_fee"))
+            order["discount"] = money_to_int(order.get("discount"))
+            order["total"] = money_to_int(order.get("total"))
+            order["formatted_total"] = format_vnd(order["total"])
+
+            cursor.execute("""
+                SELECT id, product_id, product_name, color, storage,
+                       quantity, price, total, image
+                FROM order_items
+                WHERE order_id = ?
+            """, (order_id,))
+
+            item_columns = [col[0] for col in cursor.description]
+            items = []
+
+            for item_row in cursor.fetchall():
+                item = dict(zip(item_columns, item_row))
+
+                item["quantity"] = money_to_int(item.get("quantity"))
+                item["price"] = money_to_int(item.get("price"))
+                item["total"] = money_to_int(item.get("total"))
+
+                item["formatted_price"] = format_vnd(item["price"])
+                item["formatted_total"] = format_vnd(item["total"])
+
+                items.append(item)
+
+            order["items"] = items
+            orders_list.append(order)
+
+        return render_template("orders.html", orders=orders_list)
+
+    except Exception as e:
+        app.logger.exception(e)
+        return render_template("orders.html", orders=[], error=str(e))
+
+    finally:
+        conn.close()
+
+
+@app.route("/api/orders/<int:order_id>/cancel", methods=["POST"])
+def cancel_order_api(order_id):
+    if not session.get("account_id"):
+        return jsonify({"success": False, "message": "Bạn cần đăng nhập."}), 401
+
+    conn = get_conn()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT status FROM orders WHERE id = ? AND account_id = ?
+        """, (order_id, session["account_id"]))
+        row = cursor.fetchone()
+        if not row:
+            return jsonify({"success": False, "message": "Không tìm thấy đơn hàng."}), 404
+
+        status = row[0]
+        if status not in ("Chờ xử lý", "Đang xử lý", "Chưa thanh toán"):
+            return jsonify({"success": False, "message": f"Không thể hủy đơn hàng ở trạng thái: {status}."}), 400
+
+        cursor.execute("""
+            UPDATE orders SET status = N'Đã hủy' WHERE id = ? AND account_id = ?
+        """, (order_id, session["account_id"]))
+        conn.commit()
+        return jsonify({"success": True, "message": "Đã hủy đơn hàng thành công."})
+    except Exception as e:
+        conn.rollback()
+        app.logger.exception(e)
+        return jsonify({"success": False, "message": str(e)}), 500
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+
+@app.route("/api/orders/<int:order_id>/items", methods=["GET"])
+def get_order_items_api(order_id):
+    if not session.get("account_id"):
+        return jsonify({"success": False, "message": "Bạn cần đăng nhập."}), 401
+
+    conn = get_conn()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT oi.product_id as id, oi.product_name as name, oi.color, oi.storage, oi.quantity, oi.price, oi.image
+            FROM order_items oi
+            JOIN orders o ON oi.order_id = o.id
+            WHERE o.id = ? AND o.account_id = ?
+        """, (order_id, session["account_id"]))
+
+        columns = [col[0] for col in cursor.description]
+        items = []
+        for row in cursor.fetchall():
+            items.append(dict(zip(columns, row)))
+
+        return jsonify({"success": True, "items": items})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+
+@app.route("/api/orders/<int:order_id>/refund", methods=["POST"])
+def refund_order_api(order_id):
+    if not session.get("account_id"):
+        return jsonify({"success": False, "message": "Bạn cần đăng nhập."}), 401
+
+    conn = get_conn()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE orders SET status = N'Trả hàng thành công' WHERE id = ? AND account_id = ? AND status = N'Hoàn thành'
+        """, (order_id, session["account_id"]))
+        conn.commit()
+        return jsonify({"success": True, "message": "Yêu cầu trả hàng/hoàn tiền đã được xử lý thành công."})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+
 @app.route("/request-change-phone", methods=["POST"])
 def request_change_phone():
     if not session.get("account_id"):
@@ -1424,10 +1619,115 @@ def verify_change_email_otp():
 # =========================
 # 🛒 TRANG SẢN PHẨM - giao diện thêm từ bài 2
 # =========================
+
+def parse_int(value):
+    try:
+        s = str(value or "")
+        digits = re.sub(r"[^\d]", "", s)
+        return int(digits) if digits else 0
+    except Exception:
+        return 0
+
+@app.route("/api/orders", methods=["POST"])
+def create_order_api():
+    if not session.get("account_id"):
+        return jsonify({"success": False, "message": "Bạn cần đăng nhập."}), 401
+
+    data = request.get_json()
+    items = data.get("items", [])
+
+    if not items:
+        return jsonify({"success": False, "message": "Không có sản phẩm."}), 400
+
+    order_code = "TN" + str(int(__import__("time").time()))[-7:]
+
+    conn = get_conn()
+    cursor = conn.cursor()
+
+    try:
+        # sanitize numeric fields
+        subtotal_val = parse_int(data.get("subtotal", 0))
+        shipping_fee_val = parse_int(data.get("shippingFee", 0))
+        discount_val = parse_int(data.get("discount", 0))
+        total_val = parse_int(data.get("total", 0))
+
+        cursor.execute("""
+            INSERT INTO orders (
+                order_code, account_id, receive_type, payment_method,
+                customer_name, customer_phone, address_detail,
+                city, district, ward,
+                subtotal, shipping_fee, discount, total
+            )
+            OUTPUT INSERTED.id
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            order_code,
+            session["account_id"],
+            data.get("receiveType"),
+            data.get("paymentMethod"),
+            data.get("customerName"),
+            data.get("customerPhone"),
+            data.get("addressDetail"),
+            data.get("city"),
+            data.get("district"),
+            data.get("ward"),
+            subtotal_val,
+            shipping_fee_val,
+            discount_val,
+            total_val
+        ))
+
+        order_id = cursor.fetchone()[0]
+
+        for item in items:
+            price = parse_int(item.get("priceNumber") or item.get("price_number") or item.get("price") or 0)
+            quantity = parse_int(item.get("quantity") or 1)
+
+            cursor.execute("""
+                INSERT INTO order_items (
+                    order_id, product_id, product_name,
+                    color, storage, quantity, price, total, image
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                order_id,
+                item.get("id"),
+                item.get("name"),
+                item.get("color"),
+                item.get("storage"),
+                quantity,
+                price,
+                price * quantity,
+                item.get("image")
+            ))
+
+        conn.commit()
+        return jsonify({
+            "success": True,
+            "orderCode": order_code,
+            "orderId": order_id
+        })
+
+    except Exception as error:
+        conn.rollback()
+        app.logger.exception(error)
+        return jsonify({"success": False, "message": str(error)}), 500
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
 @app.route("/cart")
 def cart():
     return render_template("cart.html")
 
+@app.route("/checkout")
+def checkout():
+    if not session.get("account_id"):
+        return redirect("/signin")
+
+    return render_template("checkout.html")
 
 @app.route("/products")
 def products_page():

@@ -1695,63 +1695,96 @@ function getSelectedProductOptions(product) {
   const activeStorageBtn = document.querySelector(".option-list button.active");
   const activeColorBtn = document.querySelector(".color-options button.active");
 
-  const selectedStorage = activeStorageBtn
-    ? activeStorageBtn.innerText.trim()
-    : product.storages?.[0]?.storage || "";
+  const storageIndex = Number(activeStorageBtn?.dataset.index || 0);
+  const colorIndex = Number(activeColorBtn?.dataset.index || 0);
 
-  const selectedColor = activeColorBtn
-    ? activeColorBtn.innerText.trim()
-    : product.colors?.[0]?.name || "";
+  const selectedStorage =
+    product.storages?.[storageIndex] || product.storages?.[0] || {};
 
-  const cartItemId = `${product.id}-${selectedStorage}-${selectedColor}`;
+  const selectedColor =
+    product.colors?.[colorIndex] || product.colors?.[0] || {};
+
+  const storageName =
+    selectedStorage.storage || activeStorageBtn?.innerText.trim() || "";
+  const colorName =
+    selectedColor.name || activeColorBtn?.innerText.trim() || "";
+
+  const priceNumber =
+    selectedStorage.priceNumber ||
+    selectedStorage.price_number ||
+    product.priceNumber ||
+    product.price_number ||
+    0;
+
+  const price = selectedStorage.price || product.price || "";
+
+  const image =
+    document.querySelector(".detail-img")?.src ||
+    selectedColor.image ||
+    product.image ||
+    "";
+
+  const cartItemId = `${product.id}-${storageName}-${colorName}`;
 
   return {
-    cartItemId,
+    cartItemId: cartItemId,
+    id: product.id,
     productId: product.id,
     name: product.name,
-    image: document.querySelector(".detail-img")?.src || product.image,
-    price: product.price,
-    priceNumber: product.priceNumber,
-    storage: selectedStorage,
-    color: selectedColor,
-    quantity,
+    image: image,
+    price: price,
+    priceNumber: priceNumber,
+    storage: storageName,
+    color: colorName,
+    quantity: quantity,
     checked: false,
   };
+}
+
+function addItemToCart(cartItem, checked = false) {
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  const existingItem = cart.find(
+    (item) => item.cartItemId === cartItem.cartItemId,
+  );
+
+  if (existingItem) {
+    existingItem.quantity =
+      Number(existingItem.quantity || 1) + Number(cartItem.quantity || 1);
+    existingItem.checked = checked;
+  } else {
+    cart.push({
+      ...cartItem,
+      checked: checked,
+    });
+  }
+
+  localStorage.setItem("cart", JSON.stringify(cart));
 }
 
 function initCartButtons(product) {
   const addCartBtn = document.querySelector(".add-cart-btn");
   const buyNowBtn = document.querySelector(".buy-now-btn");
 
-  if (!addCartBtn || !buyNowBtn) return;
+  if (addCartBtn) {
+    addCartBtn.addEventListener("click", () => {
+      const cartItem = getSelectedProductOptions(product);
 
-  addCartBtn.addEventListener("click", () => {
-    const cartItem = getSelectedProductOptions(product);
+      addItemToCart(cartItem, false);
 
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      alert("Đã thêm sản phẩm vào giỏ hàng!");
+    });
+  }
 
-    const existingItem = cart.find(
-      (item) => item.cartItemId === cartItem.cartItemId,
-    );
+  if (buyNowBtn) {
+    buyNowBtn.addEventListener("click", () => {
+      const cartItem = getSelectedProductOptions(product);
 
-    if (existingItem) {
-      existingItem.quantity += cartItem.quantity;
-    } else {
-      cart.push(cartItem);
-    }
+      addItemToCart(cartItem, true);
 
-    localStorage.setItem("cart", JSON.stringify(cart));
-
-    alert("Đã thêm sản phẩm vào giỏ hàng!");
-  });
-
-  buyNowBtn.addEventListener("click", () => {
-    const cartItem = getSelectedProductOptions(product);
-
-    localStorage.setItem("buyNowItem", JSON.stringify(cartItem));
-
-    window.location.href = "/cart";
-  });
+      window.location.href = "/cart";
+    });
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {

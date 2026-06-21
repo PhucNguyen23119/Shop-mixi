@@ -1,0 +1,671 @@
+{% extends "base.html" %} {% block title %}Đơn mua - Technova{% endblock %} {%
+block extra_head %}
+<!-- Tailwind CSS v4 CDN -->
+<script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+  .order-history-body {
+    font-family: "Inter", sans-serif;
+    background-color: #f8f9fa;
+    color: #1a1a1a;
+  }
+
+  .order-card {
+    transition: all 0.2s ease-in-out;
+  }
+
+  .order-card:hover {
+    border-color: #e5e7eb;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+  }
+
+  .status-tag {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .badge-spec {
+    font-size: 11px;
+    font-weight: 500;
+    color: #71717a;
+    background-color: #f4f4f5;
+    padding: 0.125rem 0.625rem;
+    border-radius: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-primary {
+    background-color: #1a56db;
+    color: white !important;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-primary:hover {
+    background-color: #1e42af;
+  }
+
+  .btn-secondary {
+    border: 1px solid #e5e7eb;
+    color: #4b5563;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    background: transparent;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-secondary:hover {
+    background-color: #f9fafb;
+    border-color: #9ca3af;
+  }
+
+  .btn-outline-blue {
+    border: 1px solid #1a56db;
+    color: #1a56db;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    background: transparent;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-outline-blue:hover {
+    background-color: #eff6ff;
+  }
+
+  .btn-outline-red {
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    background: transparent;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-outline-red:hover {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+  }
+
+  .animate-spin-slow {
+    animation: spin 3s linear infinite;
+  }
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="order-history-body min-h-screen py-10 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-5xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav
+      class="flex items-center space-x-2 text-[11px] text-gray-400 mb-8 uppercase tracking-wider"
+    >
+      <a href="/" class="hover:text-blue-600 transition-colors">Trang chủ</a>
+      <i data-lucide="chevron-right" class="w-3 h-3 opacity-50"></i>
+      <span class="text-gray-600 font-medium">Đơn mua</span>
+    </nav>
+
+    <main
+      class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+    >
+      <div class="p-8 lg:p-10">
+        <header class="mb-8">
+          <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-5">
+            Đơn mua & Trạng thái đơn hàng
+          </h1>
+          <div class="flex items-center justify-between">
+            <h2 class="text-[17px] font-bold text-gray-900">
+              Danh sách đơn hàng
+            </h2>
+            <div
+              class="flex items-center px-3 py-1 bg-[#e8f0fe] text-[#1a56db] rounded-full"
+            >
+              <span class="text-xs font-bold tracking-tight"
+                >{{ orders|length }} Đơn hàng</span
+              >
+            </div>
+          </div>
+        </header>
+
+        <div class="space-y-6">
+          {% if error %}
+          <div
+            class="bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg text-sm"
+          >
+            Lỗi tải đơn hàng: {{ error }}
+          </div>
+          {% endif %} {% if not orders %}
+          <!-- Empty State -->
+          <div
+            class="flex flex-col items-center justify-center py-20 px-4 text-center"
+          >
+            <div
+              class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4"
+            >
+              <i data-lucide="shopping-bag" class="w-8 h-8 text-gray-400"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-1">
+              Chưa có đơn hàng nào
+            </h3>
+            <p class="text-sm text-gray-500 mb-6 max-w-sm">
+              Bạn chưa thực hiện bất kỳ giao dịch nào trên Technova.
+            </p>
+            <a href="/" class="btn-primary">Mua sắm ngay</a>
+          </div>
+          {% else %} {% for order in orders %}
+          <article
+            class="order-card border border-gray-100 rounded-xl p-5 md:p-6 flex flex-col gap-5 bg-white"
+          >
+            <!-- Order Card Header -->
+            <div
+              class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-gray-100"
+            >
+              <div>
+                <h3 class="font-bold text-gray-900 text-[16px]">
+                  Đơn hàng #{{ order.order_code }}
+                </h3>
+                <div class="text-xs text-gray-500 mt-1">
+                  Ngày đặt: {{ order.formatted_date }} • Thanh toán: {{
+                  order.payment_method }}
+                </div>
+              </div>
+
+              <!-- Status Tags mapping -->
+              {% if order.status == 'Chưa thanh toán' %}
+              <div
+                class="status-tag text-red-500 bg-red-50 px-3 py-1 rounded-full border border-red-100"
+              >
+                <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                <span>Chưa thanh toán</span>
+              </div>
+              {% elif order.status == 'Chờ xử lý' or order.status == 'Đang xử
+              lý' %}
+              <div
+                class="status-tag text-blue-500 bg-blue-50 px-3 py-1 rounded-full border border-blue-100"
+              >
+                <i
+                  data-lucide="refresh-cw"
+                  class="w-4 h-4 animate-spin-slow"
+                ></i>
+                <span>Đang xử lý</span>
+              </div>
+              {% elif order.status == 'Hoàn thành' %}
+              <div
+                class="status-tag text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100"
+              >
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                <span>Hoàn thành</span>
+              </div>
+              {% elif order.status == 'Trả hàng thành công' or order.status ==
+              'Đã hoàn tiền' %}
+              <div
+                class="status-tag text-teal-600 bg-teal-50 px-3 py-1 rounded-full border border-teal-100"
+              >
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                <span>Trả hàng thành công</span>
+              </div>
+              {% elif order.status == 'Đã hủy' %}
+              <div
+                class="status-tag text-gray-500 bg-gray-50 px-3 py-1 rounded-full border border-gray-200"
+              >
+                <i data-lucide="x-circle" class="w-4 h-4"></i>
+                <span>Đã hủy</span>
+              </div>
+              {% else %}
+              <div
+                class="status-tag text-gray-600 bg-gray-50 px-3 py-1 rounded-full border border-gray-200"
+              >
+                <i data-lucide="info" class="w-4 h-4"></i>
+                <span>{{ order.status }}</span>
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Order Card Items list -->
+            <div class="divide-y divide-gray-100">
+              {% for item in order["items"] %}
+              <div
+                class="flex gap-4 py-3 {% if loop.first %}pt-0{% endif %} {% if loop.last %}pb-0{% endif %}"
+              >
+                <div
+                  class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-gray-50 rounded-lg flex items-center justify-center border border-gray-100 overflow-hidden"
+                >
+                  {% if item.image %}
+                  <img
+                    src="{{ item.image }}"
+                    alt="{{ item.product_name }}"
+                    class="w-full h-full object-contain mix-blend-multiply"
+                  />
+                  {% else %}
+                  <i data-lucide="image" class="w-6 h-6 text-gray-300"></i>
+                  {% endif %}
+                </div>
+                <div class="flex-grow flex flex-col justify-between">
+                  <div>
+                    <h4
+                      class="font-semibold text-gray-900 text-sm leading-snug sm:text-base"
+                    >
+                      {{ item.product_name }}
+                    </h4>
+                    <div class="flex flex-wrap gap-2 pt-1.5">
+                      {% if item.storage %}
+                      <span class="badge-spec">{{ item.storage }}</span>
+                      {% endif %} {% if item.color %}
+                      <span class="badge-spec">{{ item.color }}</span>
+                      {% endif %}
+                      <span class="badge-spec">x{{ item.quantity }}</span>
+                    </div>
+                  </div>
+                  <div class="flex justify-between items-end mt-1">
+                    <span class="text-xs text-gray-500"
+                      >Đơn giá: {{ item.formatted_price }}</span
+                    >
+                    <span class="text-sm font-semibold text-gray-900"
+                      >{{ item.formatted_total }}</span
+                    >
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+
+            <!-- Order Card Footer and Actions -->
+            <div
+              class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center pt-4 border-t border-gray-100 gap-4"
+            >
+              <div class="text-sm text-gray-600 sm:text-base">
+                Tổng thanh toán:
+                <span class="text-lg sm:text-xl font-bold text-blue-600 ml-1">
+                  {{ order.formatted_total }}
+                </span>
+              </div>
+
+              <div class="flex flex-wrap justify-end gap-2.5">
+                <button
+                  type="button"
+                  onclick="viewOrderDetail('{{ order.id }}')"
+                  class="btn-outline-blue text-xs py-2 px-3 sm:text-sm"
+                >
+                  Xem chi tiết
+                </button>
+
+                {% if order.status == 'Chưa thanh toán' %}
+                <button
+                  type="button"
+                  onclick="continuePayment('{{ order.id }}')"
+                  class="btn-primary text-xs py-2 px-4 sm:text-sm"
+                >
+                  Tiếp tục thanh toán
+                </button>
+
+                {% elif order.status == 'Chờ xử lý' or order.status == 'Đang xử
+                lý' %}
+                <button
+                  type="button"
+                  onclick="cancelOrder('{{ order.id }}')"
+                  class="btn-outline-red text-xs py-2 px-3 sm:text-sm"
+                >
+                  Hủy đơn hàng
+                </button>
+
+                {% elif order.status == 'Hoàn thành' %}
+                <button
+                  type="button"
+                  onclick="requestRefund('{{ order.id }}')"
+                  class="btn-secondary text-xs py-2 px-3 sm:text-sm"
+                >
+                  Yêu cầu trả hàng
+                </button>
+
+                <button
+                  type="button"
+                  onclick="reviewOrder('{{ order.id }}')"
+                  class="btn-outline-blue text-xs py-2 px-3 sm:text-sm"
+                >
+                  Đánh giá
+                </button>
+
+                {% elif order.status == 'Trả hàng thành công' or order.status ==
+                'Đã hoàn tiền' or order.status == 'Đã hủy' %}
+                <button
+                  type="button"
+                  onclick="buyAgain('{{ order.id }}')"
+                  class="btn-outline-blue text-xs py-2 px-3 sm:text-sm"
+                >
+                  Mua lại
+                </button>
+                {% endif %}
+              </div>
+            </div>
+          </article>
+          {% endfor %} {% endif %}
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Beautiful Order Detail Modal -->
+<div
+  id="orderDetailModal"
+  class="fixed inset-0 bg-black/60 z-[9999] flex items-start justify-center px-4 pt-24 pb-8 overflow-y-auto hidden"
+>
+  <div
+    class="bg-white rounded-2xl max-w-lg w-full max-h-[calc(100vh-9rem)] overflow-y-auto p-6 shadow-xl relative flex flex-col"
+  >
+    <!-- Close icon -->
+    <button
+      onclick="closeOrderDetail()"
+      class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+    >
+      <i data-lucide="x" class="w-6 h-6"></i>
+    </button>
+
+    <div class="border-b border-gray-100 pb-4 pr-8">
+      <h3 class="text-lg sm:text-xl font-bold text-gray-900">
+        Chi tiết đơn hàng
+      </h3>
+      <p class="text-xs text-gray-500 mt-1" id="modalOrderCode"></p>
+    </div>
+
+    <!-- Modal Content -->
+    <div class="overflow-y-auto py-4 space-y-5 text-sm" id="modalBody">
+      <!-- Recipient section -->
+      <div class="bg-gray-50 p-4 rounded-xl space-y-2.5">
+        <h4 class="font-bold text-gray-900 flex items-center gap-2">
+          <i data-lucide="map-pin" class="w-4 h-4 text-blue-600"></i> Thông tin
+          nhận hàng
+        </h4>
+        <div class="grid grid-cols-3 gap-y-1 text-gray-600">
+          <div class="font-medium">Người nhận:</div>
+          <div
+            class="col-span-2 text-gray-900 font-medium"
+            id="modalCustomerName"
+          ></div>
+
+          <div class="font-medium">Điện thoại:</div>
+          <div class="col-span-2 text-gray-900" id="modalCustomerPhone"></div>
+
+          <div class="font-medium">Địa chỉ:</div>
+          <div class="col-span-2 text-gray-900" id="modalCustomerAddress"></div>
+
+          <div class="font-medium">Vận chuyển:</div>
+          <div class="col-span-2 text-gray-900" id="modalReceiveType"></div>
+        </div>
+      </div>
+
+      <!-- Products listing -->
+      <div class="space-y-3">
+        <h4 class="font-bold text-gray-900 flex items-center gap-2">
+          <i data-lucide="box" class="w-4 h-4 text-blue-600"></i> Danh sách sản
+          phẩm
+        </h4>
+        <div class="divide-y divide-gray-100" id="modalItems">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Fee Breakdown -->
+      <div class="border-t border-gray-100 pt-4 space-y-2 text-gray-600">
+        <div class="flex justify-between">
+          <span>Tạm tính:</span>
+          <span class="text-gray-900" id="modalSubtotal"></span>
+        </div>
+        <div class="flex justify-between">
+          <span>Phí vận chuyển:</span>
+          <span class="text-gray-900" id="modalShippingFee"></span>
+        </div>
+        <div class="flex justify-between text-red-600">
+          <span>Giảm giá:</span>
+          <span id="modalDiscount"></span>
+        </div>
+        <div
+          class="flex justify-between font-bold text-base text-gray-900 pt-2 border-t border-dashed border-gray-100"
+        >
+          <span>Tổng tiền:</span>
+          <span class="text-blue-600" id="modalTotal"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="border-t border-gray-100 pt-4 flex justify-end">
+      <button onclick="closeOrderDetail()" class="btn-primary w-full sm:w-auto">
+        Đóng
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Serialized orders for client JS -->
+<script id="orders-data" type="application/json">
+  {{ orders|tojson }}
+</script>
+
+{% endblock %} {% block extra_scripts %}
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  lucide.createIcons();
+
+  // Orders data injected as JSON for client-side interactions
+  const userOrders = JSON.parse(
+    document.getElementById("orders-data").textContent || "[]",
+  );
+
+  // Functions for actions
+  function viewOrderDetail(orderId) {
+    const order = userOrders.find((o) => String(o.id) === String(orderId));
+    if (!order) return;
+
+    document.getElementById("modalOrderCode").innerText =
+      "Mã đơn hàng: #" +
+      order.order_code +
+      " • Ngày đặt: " +
+      order.formatted_date;
+    document.getElementById("modalCustomerName").innerText =
+      order.customer_name || "N/A";
+    document.getElementById("modalCustomerPhone").innerText =
+      order.customer_phone || "N/A";
+
+    // Format address
+    const addrParts = [
+      order.address_detail,
+      order.ward,
+      order.district,
+      order.city,
+    ].filter((p) => p && p.trim() !== "");
+    document.getElementById("modalCustomerAddress").innerText =
+      addrParts.join(", ") || "N/A";
+
+    // Receive Type translation
+    const recvType =
+      order.receive_type === "store"
+        ? "Nhận tại cửa hàng"
+        : "Giao hàng tận nơi";
+    document.getElementById("modalReceiveType").innerText = recvType;
+
+    // Items list
+    const itemsContainer = document.getElementById("modalItems");
+    itemsContainer.innerHTML = "";
+    order.items.forEach((item) => {
+      const itemEl = document.createElement("div");
+      itemEl.className = "flex justify-between items-center py-2.5 gap-4";
+
+      const badgesHtml = [
+        item.storage ? `<span class="badge-spec">${item.storage}</span>` : "",
+        item.color ? `<span class="badge-spec">${item.color}</span>` : "",
+      ]
+        .filter((b) => b !== "")
+        .join(" ");
+
+      itemEl.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 flex-shrink-0 bg-gray-50 border border-gray-100 rounded flex items-center justify-center overflow-hidden">
+            ${item.image ? `<img src="${item.image}" class="w-full h-full object-contain mix-blend-multiply" />` : `<i data-lucide="image" class="w-4 h-4 text-gray-300"></i>`}
+          </div>
+          <div>
+            <div class="font-medium text-gray-900 text-xs sm:text-sm">${item.product_name}</div>
+            <div class="flex gap-1.5 mt-1">
+              ${badgesHtml}
+              <span class="badge-spec">x${item.quantity}</span>
+            </div>
+          </div>
+        </div>
+        <div class="font-semibold text-gray-900">${item.formatted_total}</div>
+      `;
+      itemsContainer.appendChild(itemEl);
+    });
+
+    // Format money details helper
+    const formatVND = (num) =>
+      new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" })
+        .format(num)
+        .replace("₫", "đ");
+
+    document.getElementById("modalSubtotal").innerText = formatVND(
+      order.subtotal || 0,
+    );
+    document.getElementById("modalShippingFee").innerText = formatVND(
+      order.shipping_fee || 0,
+    );
+    document.getElementById("modalDiscount").innerText =
+      "-" + formatVND(order.discount || 0);
+    document.getElementById("modalTotal").innerText = order.formatted_total;
+
+    // Re-create icons dynamically
+    setTimeout(() => {
+      lucide.createIcons();
+    }, 50);
+
+    // Show modal
+    document.getElementById("orderDetailModal").classList.remove("hidden");
+  }
+
+  function closeOrderDetail() {
+    document.getElementById("orderDetailModal").classList.add("hidden");
+  }
+
+  async function cancelOrder(orderId) {
+    if (!confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) return;
+
+    try {
+      const response = await fetch(`/api/orders/${orderId}/cancel`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const result = await response.json();
+      if (result.success) {
+        alert("Đã hủy đơn hàng thành công.");
+        window.location.reload();
+      } else {
+        alert(result.message || "Không thể hủy đơn hàng.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Đã xảy ra lỗi khi hủy đơn hàng.");
+    }
+  }
+
+  async function requestRefund(orderId) {
+    if (
+      !confirm(
+        "Bạn có chắc chắn muốn yêu cầu trả hàng/hoàn tiền cho đơn hàng này?",
+      )
+    )
+      return;
+
+    try {
+      const response = await fetch(`/api/orders/${orderId}/refund`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const result = await response.json();
+      if (result.success) {
+        alert(result.message);
+        window.location.reload();
+      } else {
+        alert(result.message || "Không thể yêu cầu hoàn tiền.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Đã xảy ra lỗi.");
+    }
+  }
+
+  function reviewOrder(orderId) {
+    const rating = prompt("Vui lòng nhập đánh giá của bạn (1-5 sao):", "5");
+    if (rating === null) return;
+    const num = parseInt(rating);
+    if (isNaN(num) || num < 1 || num > 5) {
+      alert("Đánh giá không hợp lệ. Vui lòng nhập số từ 1 đến 5.");
+      return;
+    }
+    alert("Cảm ơn bạn đã gửi đánh giá cho Technova!");
+  }
+
+  async function buyAgain(orderId) {
+    try {
+      const response = await fetch(`/api/orders/${orderId}/items`);
+      const result = await response.json();
+      if (result.success && result.items && result.items.length > 0) {
+        localStorage.setItem("checkoutItems", JSON.stringify(result.items));
+        window.location.href = "/checkout";
+      } else {
+        alert(result.message || "Không thể lấy thông tin sản phẩm để mua lại.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Đã xảy ra lỗi.");
+    }
+  }
+
+  async function continuePayment(orderId) {
+    // Treat as buyAgain, load items to checkout and go to payment/checkout
+    await buyAgain(orderId);
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,356 @@
+{% extends "base.html" %} {% block title %}Đặt hàng{% endblock %} {% block
+extra_head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/shop.css') }}"
+/>
+{% endblock %} {% block content %}
+
+<div class="breadcrumb">
+  <a href="/" class="breadcrumb-home">Trang chủ</a>
+  <span class="breadcrumb-separator">></span>
+  <span class="breadcrumb-current">Đặt hàng</span>
+</div>
+
+<div class="checkout-page">
+  <div class="checkout-main">
+    <section class="checkout-card">
+      <h2>Hình thức nhận hàng</h2>
+
+      <div class="receive-options">
+        <label class="receive-option active">
+          <input type="radio" name="receiveType" value="delivery" checked />
+          <div>
+            <strong>
+              <i class="fa-solid fa-box-open receive-icon"></i>
+              Giao hàng tận nơi
+            </strong>
+            <p>Nhận hàng tại nhà hoặc cơ quan</p>
+          </div>
+        </label>
+
+        <label class="receive-option">
+          <input type="radio" name="receiveType" value="store" />
+          <div>
+            <strong>
+              <i class="fa-solid fa-house receive-icon"></i>
+              Nhận tại cửa hàng
+            </strong>
+            <p>Miễn phí, nhận sau 30 phút</p>
+          </div>
+        </label>
+      </div>
+
+      <div class="delivery-box" id="deliveryBox">
+        <div class="checkout-section-title">📍 Địa chỉ nhận hàng</div>
+        <div id="addressDisplay">
+          <a href="#" id="openAddressModalBtn" class="add-address-link">
+            + Thêm địa chỉ nhận hàng
+          </a>
+        </div>
+      </div>
+
+      <div class="store-box" id="storeBox">
+        <div class="checkout-section-title">Chọn cửa hàng nhận hàng</div>
+
+        <label class="store-option">
+          <input type="radio" name="store" />
+          <div>
+            <strong>Technova Cần Thơ - Chi nhánh 1</strong>
+            <p>
+              123C Đường Cách Mạng Tháng 8, Phường An Thới, Quận Bình Thủy, Cần
+              Thơ
+            </p>
+            <small>Có thể nhận sau 30 phút</small>
+          </div>
+        </label>
+
+        <label class="store-option active">
+          <input type="radio" name="store" checked />
+          <div>
+            <strong>Technova Cần Thơ - Chi nhánh 2</strong>
+            <p>
+              45/7 Nguyễn Văn Linh, Phường Hưng Lợi, Quận Ninh Kiều, Cần Thơ
+            </p>
+            <small>Có thể nhận sau 30 phút</small>
+          </div>
+        </label>
+      </div>
+    </section>
+
+    <section class="checkout-card">
+      <h2>Phương thức thanh toán</h2>
+
+      <label class="payment-option active">
+        <input type="radio" name="payment" value="card" checked />
+        <div>
+          <strong>
+            <i class="fa-regular fa-credit-card payment-icon"></i>
+            Thanh toán qua thẻ
+          </strong>
+          <p>Hỗ trợ Credit/Debit, ATM Nội địa</p>
+        </div>
+        <span class="card-tags">VISA&nbsp;&nbsp;MC</span>
+      </label>
+
+      <div class="card-inputs">
+        <label>Số thẻ</label>
+        <input id="cardNumber" type="text" placeholder="0000 0000 0000 0000" />
+
+        <div class="card-input-row">
+          <div>
+            <label>Ngày hết hạn (MM/YY)</label>
+            <input id="cardExpiry" type="text" placeholder="MM/YY" />
+            <p id="cardExpiryError" class="checkout-input-error"></p>
+          </div>
+
+          <div>
+            <label>CVV</label>
+            <div class="cvv-box">
+              <input
+                id="cardCvv"
+                type="password"
+                placeholder="***"
+                maxlength="3"
+                inputmode="numeric"
+              />
+              <img
+                id="toggleCvvBtn"
+                src="{{ url_for('static', filename='img/hide-eye.png') }}"
+                class="cvv-eye-icon"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <label class="payment-option">
+        <input type="radio" name="payment" value="cod" />
+        <div>
+          <strong>
+            <i class="fa-solid fa-money-bill-wave payment-icon"></i>
+            Thanh toán khi nhận hàng/Tại cửa hàng
+          </strong>
+          <p>Thanh toán bằng tiền mặt hoặc quét thẻ trực tiếp</p>
+        </div>
+      </label>
+    </section>
+  </div>
+
+  <aside class="checkout-side">
+    <section class="checkout-card summary-card">
+      <h2>Tóm tắt đơn hàng</h2>
+      <div class="checkout-items"></div>
+
+      <div class="summary-line">
+        <span>Tạm tính</span>
+        <strong id="checkoutSubtotal">0đ</strong>
+      </div>
+      <div class="summary-line discount-line" style="display: none">
+        <span>Giảm giá</span>
+        <strong id="checkoutDiscount">-0đ</strong>
+      </div>
+      <div class="summary-line">
+        <span>Phí vận chuyển</span>
+        <strong class="blue">14.000đ</strong>
+      </div>
+
+      <div class="summary-total">
+        <span>Tổng cộng</span>
+        <strong id="checkoutTotal">0đ</strong>
+      </div>
+
+      <button class="place-order-btn">Đặt hàng</button>
+    </section>
+
+    <section class="checkout-card coupon-box">
+      <div class="coupon-input">
+        <input type="text" placeholder="Mã giảm giá" />
+        <button>Áp dụng</button>
+      </div>
+    </section>
+
+    <section class="checkout-card voucher-box">
+      <h2>Voucher khả dụng</h2>
+
+      <div class="voucher active" data-code="TECH5">
+        <strong>TECH 5</strong>
+        <p>Giảm 5%, tối đa 500.000đ</p>
+        <button>Áp dụng</button>
+      </div>
+
+      <div class="voucher" data-code="TECH10">
+        <strong>TECH 10</strong>
+        <p>Giảm 10%, tối đa 1.000.000đ</p>
+        <button>Áp dụng</button>
+      </div>
+
+      <div class="voucher disabled" data-="TECH15">
+        <strong>TECH 15</strong>
+        <p>Giảm 15%, tối đa 2.000.000đ</p>
+        <button>Áp dụng</button>
+      </div>
+    </section>
+  </aside>
+</div>
+<div class="address-modal-overlay" id="addressModalOverlay">
+  <div class="address-modal-box">
+    <div class="address-modal-header">
+      <h3>Thêm địa chỉ nhận hàng</h3>
+      <button type="button" id="closeAddressModalBtn">×</button>
+    </div>
+
+    <div class="address-modal-body">
+      <div class="address-row-2">
+        <div>
+          <label>Họ và tên</label>
+          <input
+            id="addressName"
+            type="text"
+            value="{{ session.get('full_name') }}"
+          />
+        </div>
+
+        <div>
+          <label>Số điện thoại</label>
+          <input
+            id="addressPhone"
+            type="text"
+            value="{{ session.get('phone') or '' }}"
+          />
+        </div>
+      </div>
+
+      <label>Địa chỉ chi tiết</label>
+      <input
+        id="addressDetail"
+        type="text"
+        placeholder="Số nhà, tên đường, phường/xã"
+      />
+
+      <div class="address-row-3">
+        <select id="addressCity">
+          <option value="">Chọn Tỉnh/Thành phố</option>
+          <option>Cần Thơ</option>
+          <option>TP. Hồ Chí Minh</option>
+        </select>
+
+        <select id="addressDistrict">
+          <option value="">Chọn Quận/Huyện</option>
+          <option>Quận Bình Thủy</option>
+          <option>Quận Ninh Kiều</option>
+        </select>
+
+        <select id="addressWard">
+          <option value="">Chọn Phường/Xã</option>
+          <option>Phường Bình Thủy</option>
+          <option>Phường An Thới</option>
+        </select>
+      </div>
+
+      <label>Loại địa chỉ</label>
+      <div class="address-type">
+        <label
+          ><input type="radio" name="addressType" value="Nhà riêng" checked />
+          Nhà riêng</label
+        >
+        <label
+          ><input type="radio" name="addressType" value="Văn phòng" /> Văn
+          phòng</label
+        >
+      </div>
+
+      <label class="default-address">
+        <input type="checkbox" id="defaultAddress" />
+        Đặt làm địa chỉ mặc định
+      </label>
+    </div>
+
+    <div class="address-modal-footer">
+      <button type="button" id="backAddressBtn">Trở lại</button>
+      <button type="button" id="saveAddressBtn">Hoàn thành</button>
+    </div>
+  </div>
+</div>
+<!-- xác nhận đơn hàng -->
+<div class="order-modal-overlay" id="otpOrderOverlay">
+  <div class="order-modal-box otp-payment-box">
+    <div class="otp-shield">
+      <i class="fa-solid fa-shield"></i>
+    </div>
+
+    <h3>Xác thực thanh toán</h3>
+
+    <p class="otp-desc">
+      Mã OTP đã được gửi đến số điện thoại
+      <br />
+      <strong>0326****108.</strong>
+      Vui lòng nhập mã OTP để hoàn tất thanh toán.
+    </p>
+
+    <div class="order-otp-inputs">
+      <input maxlength="1" inputmode="numeric" />
+      <input maxlength="1" inputmode="numeric" />
+      <input maxlength="1" inputmode="numeric" />
+      <input maxlength="1" inputmode="numeric" />
+      <input maxlength="1" inputmode="numeric" />
+      <input maxlength="1" inputmode="numeric" />
+    </div>
+
+    <p class="order-timer">
+      Thời gian còn lại: <span id="orderOtpTimer">01:57</span>
+    </p>
+
+    <button type="button" class="resend-otp-btn">Gửi lại mã OTP</button>
+
+    <p class="order-error" id="orderOtpError">Mã OTP không đúng.</p>
+
+    <div class="order-modal-actions">
+      <button type="button" id="cancelOrderOtpBtn">Hủy thanh toán</button>
+      <button type="button" id="confirmOrderOtpBtn">Xác nhận</button>
+    </div>
+  </div>
+</div>
+
+<!-- Thanh toán thành công -->
+<div class="order-modal-overlay" id="orderSuccessOverlay">
+  <div class="order-modal-box success-payment-box">
+    <div class="success-checkmark">
+      <i class="fa-solid fa-check"></i>
+    </div>
+
+    <h3>Thanh toán thành công</h3>
+
+    <p class="success-desc">
+      Giao dịch của bạn đã được xác nhận thành công.
+      <br />
+      Đơn hàng đã được ghi nhận và đang chờ xử lý.
+      <br />
+      Cảm ơn bạn đã mua sắm tại Technova.
+    </p>
+
+    <div class="success-info-box">
+      <div class="success-info-row">
+        <span class="success-label">Mã đơn hàng:</span>
+        <span class="success-value" id="successOrderCode">TN20260001</span>
+      </div>
+      <div class="success-info-row">
+        <span class="success-label">Tổng thanh toán:</span>
+        <span class="success-price" id="successOrderTotal">39.294.000đ</span>
+      </div>
+    </div>
+
+    <div class="order-modal-actions">
+      <button type="button" id="viewOrderBtn" class="btn-outline">
+        Xem đơn hàng
+      </button>
+      <button type="button" id="homeBtn" class="btn-primary">
+        Trở về trang chủ
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+
+{% endblock %}

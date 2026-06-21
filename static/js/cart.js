@@ -236,11 +236,7 @@ function initCheckout() {
     }
 
     localStorage.setItem("checkoutItems", JSON.stringify(selectedItems));
-
-    alert("Đang chuyển sang trang thanh toán...");
-
-    // Sau này có trang checkout thì mở dòng này:
-    // window.location.href = "/checkout";
+    window.location.href = "/checkout";
   });
 }
 
