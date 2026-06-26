@@ -1,0 +1,45 @@
+{% extends "base.html" %} {% block title %}Trang quản trị{% endblock %} {% block
+content %}
+<div class="admin-page">
+  <div class="admin-hero">
+    <h1>Trang quản trị Technova</h1>
+    <p>Quản lý sản phẩm, đơn hàng, khách hàng và doanh thu của hệ thống.</p>
+  </div>
+
+  <div class="admin-stats">
+    <div class="admin-card">
+      <div class="label">Tổng sản phẩm</div>
+      <div class="number text-blue">{{ total_products }}</div>
+    </div>
+
+    <div class="admin-card">
+      <div class="label">Tổng đơn hàng</div>
+      <div class="number text-green">{{ total_orders }}</div>
+    </div>
+
+    <div class="admin-card">
+      <div class="label">Tài khoản khách</div>
+      <div class="number text-purple">{{ total_customers }}</div>
+    </div>
+
+    <div class="admin-card">
+      <div class="label">Doanh thu</div>
+      <div class="number text-red">{{ revenue }}</div>
+    </div>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-title-row">
+      <div>
+        <h1>Chức năng quản trị</h1>
+        <p>Chọn chức năng bạn muốn thao tác.</p>
+      </div>
+    </div>
+
+    <div class="admin-actions">
+      <a href="/admin/products" class="admin-btn blue">Quản lý sản phẩm</a>
+      <a href="/admin/orders" class="admin-btn green">Quản lý đơn hàng</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

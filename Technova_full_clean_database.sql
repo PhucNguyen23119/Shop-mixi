@@ -333,79 +333,123 @@ OUTER APPLY (
 GO
 CREATE TABLE orders (
     id INT IDENTITY(1,1) PRIMARY KEY,
-    order_code NVARCHAR(30) NOT NULL,
+    order_code NVARCHAR(30) NOT NULL UNIQUE,
     account_id INT NOT NULL,
+
     receive_type NVARCHAR(30),
     payment_method NVARCHAR(30),
+
     customer_name NVARCHAR(100),
     customer_phone NVARCHAR(20),
     address_detail NVARCHAR(255),
     city NVARCHAR(100),
     district NVARCHAR(100),
     ward NVARCHAR(100),
-    subtotal INT,
-    shipping_fee INT,
-    discount INT,
-    total INT,
+
+    subtotal INT DEFAULT 0,
+    shipping_fee INT DEFAULT 0,
+    discount INT DEFAULT 0,
+    total INT DEFAULT 0,
+
     status NVARCHAR(50) DEFAULT N'Chờ xử lý',
-    created_at DATETIME DEFAULT GETDATE()
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME NULL,
+
+    CONSTRAINT fk_orders_account
+        FOREIGN KEY (account_id) REFERENCES accounts(id)
+        ON DELETE CASCADE
 );
+GO
 
 CREATE TABLE order_items (
     id INT IDENTITY(1,1) PRIMARY KEY,
     order_id INT NOT NULL,
-    product_id INT,
+    product_id INT NULL,
+
     product_name NVARCHAR(255),
     color NVARCHAR(100),
     storage NVARCHAR(100),
-    quantity INT,
-    price INT,
-    total INT,
+    quantity INT DEFAULT 1,
+    price INT DEFAULT 0,
+    total INT DEFAULT 0,
     image NVARCHAR(MAX),
-    FOREIGN KEY (order_id) REFERENCES orders(id)
+
+    CONSTRAINT fk_order_items_order
+        FOREIGN KEY (order_id) REFERENCES orders(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_order_items_product
+        FOREIGN KEY (product_id) REFERENCES products(id)
+        ON DELETE SET NULL
 );
-CREATE TABLE orders (
+GO
+CREATE TABLE cart_items (
     id INT IDENTITY(1,1) PRIMARY KEY,
-    order_code NVARCHAR(30) NOT NULL,
     account_id INT NOT NULL,
-    receive_type NVARCHAR(30),
-    payment_method NVARCHAR(30),
-    customer_name NVARCHAR(100),
-    customer_phone NVARCHAR(20),
-    address_detail NVARCHAR(255),
-    city NVARCHAR(100),
-    district NVARCHAR(100),
-    ward NVARCHAR(100),
-    subtotal INT,
-    shipping_fee INT,
-    discount INT,
-    total INT,
-    status NVARCHAR(50) DEFAULT N'Chờ xử lý',
-    created_at DATETIME DEFAULT GETDATE()
-);
-
-CREATE TABLE order_items (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    order_id INT NOT NULL,
-    product_id INT,
-    product_name NVARCHAR(255),
+    product_id INT NOT NULL,
     color NVARCHAR(100),
     storage NVARCHAR(100),
-    quantity INT,
-    price INT,
-    total INT,
-    image NVARCHAR(MAX),
-    FOREIGN KEY (order_id) REFERENCES orders(id)
+    quantity INT DEFAULT 1,
+    created_at DATETIME DEFAULT GETDATE(),
+
+    CONSTRAINT fk_cart_account
+        FOREIGN KEY (account_id) REFERENCES accounts(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_cart_product
+        FOREIGN KEY (product_id) REFERENCES products(id)
+        ON DELETE CASCADE
 );
-SELECT TOP 10 * FROM orders ORDER BY id DESC;
+GO
+CREATE TABLE vouchers (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    code NVARCHAR(50) NOT NULL UNIQUE,
+    name NVARCHAR(100),
+    percent_discount INT DEFAULT 0,
+    max_discount INT DEFAULT 0,
+    min_order INT DEFAULT 0,
+    is_active BIT DEFAULT 1,
+    created_at DATETIME DEFAULT GETDATE()
+);
+GO
 /* ==========================================================
    4. DỮ LIỆU ĐIỆN THOẠI CHO BÀI 1
    ========================================================== */
+   INSERT INTO vouchers (
+    code,
+    name,
+    percent_discount,
+    max_discount,
+    min_order,
+    is_active
+)
+VALUES
+    (N'TECH5',  N'TECH 5',  5,  500000,  0,        1),
+    (N'TECH10', N'TECH 10', 10, 1000000, 5000000,  1),
+    (N'TECH15', N'TECH 15', 15, 2000000, 20000000, 0);
+GO
+   INSERT INTO accounts (username, email, phone, password_md5, role, status)
+VALUES (
+    N'admin@technova.com',
+    N'admin@technova.com',
+    N'0999999999',
+    N'25d55ad283aa400af464c76d713c07ad',
+    N'admin',
+    N'active'
+);
 
+INSERT INTO admin_profiles (account_id, admin_name, avatar_url)
+VALUES (
+    SCOPE_IDENTITY(),
+    N'Quản trị viên Technova',
+    NULL
+);
+GO
 DECLARE @Iphone17eId INT;
 DECLARE @IphonePinkId INT;
 DECLARE @IphoneBlackId INT;
 DECLARE @IphoneWhiteId INT;
+
 
 INSERT INTO products_phone (
     name, category, brand,
@@ -808,9 +852,9 @@ VALUES
     (@ProductId, @ColorBlackId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-black-2-639174880454423590-750x500.jpg', 2),
     (@ProductId, @ColorBlackId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-black-3-639174880462321235-750x500.jpg', 3),
     (@ProductId, @ColorBlackId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-black-4-639174880468448735-750x500.jpg', 4),
-    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-5-639174880003681348-750x500.jpg', 5),
-    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-6-639174880010400520-750x500.jpg', 6),
-    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-black-8-639174880494309952-750x500.jpg', 7);
+    (@ProductId, @ColorBlackId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-5-639174880003681348-750x500.jpg', 5),
+    (@ProductId, @ColorBlackId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-6-639174880010400520-750x500.jpg', 6),
+    (@ProductId, @ColorBlackId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-black-8-639174880494309952-750x500.jpg', 7);
 
 /* Gallery màu 3 */
 
@@ -825,9 +869,9 @@ VALUES
     (@ProductId, @ColorWhiteId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-white-2-639174880277679447-750x500.jpg', 2),
     (@ProductId, @ColorWhiteId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-white-3-639174880284814639-750x500.jpg', 3),
     (@ProductId, @ColorWhiteId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-white-4-639174880291739528-750x500.jpg', 4),
-    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-5-639174880003681348-750x500.jpg', 5),
-    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-6-639174880010400520-750x500.jpg', 6),
-    (@ProductId, @ColorPinkId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-white-8-639174880317882892-750x500.jpg', 7);
+    (@ProductId, @ColorWhiteId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-5-639174880003681348-750x500.jpg', 5),
+    (@ProductId, @ColorWhiteId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-pink-6-639174880010400520-750x500.jpg', 6),
+    (@ProductId, @ColorWhiteId, N'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/42/342693/iphone-17e-white-8-639174880317882892-750x500.jpg', 7);
 
 /* ==========================================================
    THÔNG SỐ KỸ THUẬT
@@ -1264,3 +1308,36 @@ FROM accounts a
 JOIN customer_profiles p
     ON a.id = p.account_id
 ORDER BY a.id DESC;
+USE Technova;
+GO
+SELECT s.*
+FROM product_storages s
+JOIN products p ON s.product_id = p.id
+WHERE p.name = N'iPhone 17 Pro Max';
+
+USE Technova;
+GO
+
+SELECT p.id, p.name, p.category, p.brand, s.price_text, s.price_number
+FROM products p
+JOIN product_storages s ON p.id = s.product_id
+WHERE p.name IN (
+    N'Xiaomi 17T',
+    N'Samsung Galaxy A57',
+    N'MacBook Neo 13 A18 Pro 8GB 256GB',
+    N'iPad Pro M5 11 inch 256GB',
+    N'Apple AirPods Pro 2 USB-C'
+);
+USE Technova;
+GO
+
+SELECT id, username, email, phone, role, status
+FROM accounts
+WHERE role = 'admin';
+
+USE Technova;
+GO
+
+SELECT id, name
+FROM products
+WHERE id = 1;

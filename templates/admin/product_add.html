@@ -1,0 +1,87 @@
+{% extends "base.html" %} {% block title %}Thêm sản phẩm{% endblock %} {% block
+content %}
+<div class="admin-page admin-form-page">
+  <div class="admin-title-row">
+    <div>
+      <h1>Thêm sản phẩm</h1>
+      <p>Nhập thông tin cơ bản để tạo sản phẩm mới trên hệ thống.</p>
+    </div>
+
+    <a href="/admin/products" class="admin-btn gray">← Quay lại</a>
+  </div>
+
+  <form method="POST" class="admin-section admin-product-form">
+    <div class="admin-form-grid">
+      <div class="admin-field">
+        <label>Tên sản phẩm</label>
+        <input name="name" required placeholder="Ví dụ: iPhone 17 Pro Max" />
+      </div>
+
+      <div class="admin-field">
+        <label>Thương hiệu</label>
+        <input name="brand" required placeholder="Apple, Samsung, ASUS..." />
+      </div>
+
+      <div class="admin-field">
+        <label>Danh mục</label>
+        <select name="category" required>
+          <option value="phone">Điện thoại</option>
+          <option value="tablet">Máy tính bảng</option>
+          <option value="laptop">Laptop</option>
+          <option value="ipad">iPad</option>
+          <option value="audio">Tai nghe</option>
+          <option value="accessory">Phụ kiện</option>
+          <option value="watch">Đồng hồ</option>
+          <option value="printer">Màn hình, Máy in</option>
+        </select>
+      </div>
+
+      <div class="admin-field">
+        <label>Ảnh chính</label>
+        <input name="main_image" placeholder="/static/img/ten-anh.jpg" />
+      </div>
+
+      <div class="admin-field admin-field-full">
+        <label>Danh sách phiên bản</label>
+        <textarea
+          name="variants"
+          rows="5"
+          required
+          placeholder="Nhập mỗi phiên bản 1 dòng, ví dụ:
+256GB | 8GB RAM | 34990000 | 39000000
+512GB | 8GB RAM | 39990000 | 44990000
+1TB | 8GB RAM | 46990000 | 49990000"
+        ></textarea>
+      </div>
+
+      <div class="admin-field admin-field-full">
+        <label>Danh sách màu sắc</label>
+        <textarea
+          name="colors"
+          rows="5"
+          required
+          placeholder="Nhập mỗi màu 1 dòng, ví dụ:
+Hồng | #f5a3d7 | /static/img/iphone-17e-pink.jpg
+Đen | #000000 | /static/img/iphone-17e-black.jpg
+Trắng | #ffffff | /static/img/iphone-17e-white.jpg"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="admin-field admin-field-full">
+      <label>Mô tả ngắn</label>
+      <textarea
+        name="description"
+        rows="4"
+        placeholder="Nhập mô tả ngắn về sản phẩm..."
+      ></textarea>
+    </div>
+
+    <div class="admin-form-actions">
+      <button type="submit" class="admin-btn blue">Lưu sản phẩm</button>
+
+      <a href="/admin/products" class="admin-btn gray"> Hủy </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

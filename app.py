@@ -16,7 +16,25 @@ def get_conn():
         "DATABASE=Technova;"
         "Trusted_Connection=yes;"
     )
+def is_admin():
+    return session.get("role") == "admin"
+def parse_price_to_number(price_text):
+    if not price_text:
+        return 0
 
+    number = re.sub(r"\D", "", price_text)
+
+    if number == "":
+        return 0
+
+    return int(number)
+
+
+def format_vnd(price_number):
+    if not price_number:
+        return "Đang cập nhật"
+
+    return f"{price_number:,}".replace(",", ".") + "đ"
 # =========================
 # 🛒 SQL sản phẩm từ bài 2
 # Giữ riêng để không làm hỏng database tài khoản của bài 1.
@@ -162,17 +180,19 @@ def signin():
         cursor = conn.cursor()
 
         cursor.execute("""
-            SELECT 
+            SELECT
                 a.id,
                 a.email,
                 a.phone,
-                p.full_name,
+                a.role,
+                COALESCE(p.full_name, ad.admin_name, a.username, a.email) AS display_name,
                 p.gender
             FROM accounts a
-            JOIN customer_profiles p ON a.id = p.account_id
+            LEFT JOIN customer_profiles p ON a.id = p.account_id
+            LEFT JOIN admin_profiles ad ON a.id = ad.account_id
             WHERE (a.email = ? OR a.phone = ?)
-              AND a.password_md5 = ?
-              AND a.status = 'active'
+            AND a.password_md5 = ?
+            AND a.status = 'active'
         """, (login_input, login_input, password_md5))
 
         user = cursor.fetchone()
@@ -194,12 +214,26 @@ def signin():
         # }
 
         # return redirect("/otp?from=signin")
-        session["account_id"] = user[0]
-        session["email"] = user[1]
-        session["phone"] = user[2]
-        session["full_name"] = user[3]
-        session["last_name"] = get_last_name(user[3])
-        session["gender"] = user[4]
+        account_id = user[0]
+        email = user[1]
+        phone = user[2]
+        role = user[3]
+        display_name = user[4]
+        gender = user[5]
+
+        session.clear()
+
+        session["account_id"] = account_id
+        session["email"] = email
+        session["phone"] = phone
+        session["role"] = role
+        session["full_name"] = display_name
+        session["last_name"] = get_last_name(display_name)
+        session["gender"] = gender if gender else "Nam"
+        
+
+        if role == "admin":
+            return redirect("/admin")
 
         return redirect("/")
     return render_template("signin.html", error_message=error_message)
@@ -445,7 +479,7 @@ def verify_signup_otp():
     session["full_name"] = full_name
     session["last_name"] = get_last_name(full_name)
     session["gender"] = gender
-
+    session["role"] = "customer"
     return redirect("/")
 
 
@@ -972,6 +1006,9 @@ def verify_infor_save_otp():
 def orders():
     if not session.get("account_id"):
         return redirect("/signin")
+    
+    if is_admin():
+        return redirect("/admin")
 
     def money_to_int(value):
         try:
@@ -1282,8 +1319,802 @@ def verify_change_phone_otp():
 def logout():
     session.clear()
     return redirect("/")
+@app.route("/admin")
+def admin_dashboard():
+    if not session.get("account_id"):
+        return redirect("/signin")
 
+    if session.get("role") != "admin":
+        return redirect("/")
 
+    conn = get_conn()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM products")
+    total_products = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM orders")
+    total_orders = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM accounts WHERE role = 'customer'")
+    total_customers = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT ISNULL(SUM(total), 0)
+        FROM orders
+        WHERE status NOT IN (N'Đã hủy', N'Đã hoàn tiền')
+    """)
+    revenue_number = cursor.fetchone()[0]
+
+    conn.close()
+
+    revenue = f"{int(revenue_number):,}".replace(",", ".") + "đ"
+
+    return render_template(
+        "admin/dashboard.html",
+        total_products=total_products,
+        total_orders=total_orders,
+        total_customers=total_customers,
+        revenue=revenue
+    )
+@app.route("/admin/products")
+def admin_products():
+    if not session.get("account_id"):
+        return redirect("/signin")
+
+    if session.get("role") != "admin":
+        return redirect("/")
+
+    conn = get_conn()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            p.id,
+            p.name,
+            p.category,
+            p.brand,
+            p.rating,
+            p.sold,
+            p.is_new,
+            ISNULL(s.storage, N'') AS storage,
+            ISNULL(s.ram, N'') AS ram,
+            ISNULL(s.price_text, N'Đang cập nhật') AS price_text,
+            ISNULL(c.main_image, N'/static/img/no-image.png') AS main_image
+        FROM products p
+        OUTER APPLY (
+            SELECT TOP 1 storage, ram, price_text
+            FROM product_storages
+            WHERE product_id = p.id
+            ORDER BY display_order ASC, id ASC
+        ) s
+        OUTER APPLY (
+            SELECT TOP 1 main_image
+            FROM product_colors
+            WHERE product_id = p.id
+            ORDER BY display_order ASC, id ASC
+        ) c
+        ORDER BY p.id DESC
+    """)
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    products = []
+    for row in rows:
+        products.append({
+            "id": row[0],
+            "name": row[1],
+            "category": row[2],
+            "brand": row[3],
+            "rating": row[4],
+            "sold": row[5],
+            "is_new": row[6],
+            "storage": row[7],
+            "ram": row[8],
+            "price_text": row[9],
+            "main_image": row[10]
+        })
+
+    return render_template("admin/products.html", products=products)
+@app.route("/admin/products/add", methods=["GET", "POST"])
+def admin_add_product():
+    if not session.get("account_id"):
+        return redirect("/signin")
+
+    if session.get("role") != "admin":
+        return redirect("/")
+
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        category = request.form.get("category", "").strip()
+        brand = request.form.get("brand", "").strip()
+        description = request.form.get("description", "").strip()
+
+        variants_input = request.form.get("variants", "").strip()
+        colors_input = request.form.get("colors", "").strip()
+        main_image = request.form.get("main_image", "").strip()
+
+        variant_lines = [
+            line.strip()
+            for line in variants_input.splitlines()
+            if line.strip()
+        ]
+
+        if not variant_lines:
+            return "Vui lòng nhập ít nhất 1 phiên bản sản phẩm"
+
+        first_variant_parts = [part.strip() for part in variant_lines[0].split("|")]
+
+        first_price_input = first_variant_parts[2] if len(first_variant_parts) > 2 else "0"
+        first_old_price_input = first_variant_parts[3] if len(first_variant_parts) > 3 else ""
+
+        price_number = parse_price_to_number(first_price_input)
+        old_price_number = parse_price_to_number(first_old_price_input)
+
+        old_price_text = format_vnd(old_price_number) if old_price_number else None
+
+        has_discount = 1 if old_price_number and old_price_number > price_number else 0
+        discount = None
+
+        if has_discount and price_number > 0:
+            discount_percent = round((old_price_number - price_number) * 100 / old_price_number)
+            discount = f"-{discount_percent}%"
+
+        color_lines = [
+            line.strip()
+            for line in colors_input.splitlines()
+            if line.strip()
+        ]
+
+        if not color_lines:
+            color_lines = ["Mặc định | #000000 | /static/img/no-image.png"]
+
+        first_color_parts = [part.strip() for part in color_lines[0].split("|")]
+        first_color_image = first_color_parts[2] if len(first_color_parts) > 2 else "/static/img/no-image.png"
+
+        if not main_image:
+            main_image = first_color_image
+
+        conn = get_conn()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("""
+                INSERT INTO products (
+                    name,
+                    category,
+                    brand,
+                    description,
+                    old_price_text,
+                    old_price_number,
+                    discount,
+                    has_discount,
+                    rating,
+                    sold,
+                    is_flash_sale,
+                    is_featured,
+                    is_new,
+                    technical_image
+                )
+                OUTPUT INSERTED.id
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                name,
+                category,
+                brand,
+                description,
+                old_price_text,
+                old_price_number if old_price_number else None,
+                discount,
+                has_discount,
+                4.8,
+                0,
+                0,
+                0,
+                1,
+                main_image
+            ))
+
+            product_id = cursor.fetchone()[0]
+
+            display_order = 1
+
+            for line in variant_lines:
+                parts = [part.strip() for part in line.split("|")]
+
+                storage = parts[0] if len(parts) > 0 else "Mặc định"
+                ram = parts[1] if len(parts) > 1 else ""
+                price_input = parts[2] if len(parts) > 2 else "0"
+
+                price_number_variant = parse_price_to_number(price_input)
+                price_text_variant = format_vnd(price_number_variant)
+
+                cursor.execute("""
+                    INSERT INTO product_storages (
+                        product_id,
+                        storage,
+                        ram,
+                        price_text,
+                        price_number,
+                        display_order
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (
+                    product_id,
+                    storage,
+                    ram,
+                    price_text_variant,
+                    price_number_variant,
+                    display_order
+                ))
+
+                display_order += 1
+
+            color_order = 1
+
+            for line in color_lines:
+                parts = [part.strip() for part in line.split("|")]
+
+                color_name = parts[0] if len(parts) > 0 else "Mặc định"
+                color_code = parts[1] if len(parts) > 1 else "#000000"
+                color_image = parts[2] if len(parts) > 2 else "/static/img/no-image.png"
+
+                cursor.execute("""
+                    INSERT INTO product_colors (
+                        product_id,
+                        color_name,
+                        color_code,
+                        main_image,
+                        display_order
+                    )
+                    OUTPUT INSERTED.id
+                    VALUES (?, ?, ?, ?, ?)
+                """, (
+                    product_id,
+                    color_name,
+                    color_code,
+                    color_image,
+                    color_order
+                ))
+
+                color_id = cursor.fetchone()[0]
+
+                cursor.execute("""
+                    INSERT INTO product_color_images (
+                        product_id,
+                        color_id,
+                        image_url,
+                        display_order
+                    )
+                    VALUES (?, ?, ?, ?)
+                """, (
+                    product_id,
+                    color_id,
+                    color_image,
+                    1
+                ))
+
+                color_order += 1
+
+            conn.commit()
+
+            return redirect(f"/admin/products/{product_id}/specs")
+
+        except Exception as e:
+            conn.rollback()
+            return f"Lỗi thêm sản phẩm: {e}"
+
+        finally:
+            conn.close()
+
+    return render_template("admin/product_add.html")
+@app.route("/admin/products/<int:product_id>/edit", methods=["GET", "POST"])
+def admin_edit_product(product_id):
+    if not session.get("account_id"):
+        return redirect("/signin")
+
+    if session.get("role") != "admin":
+        return redirect("/")
+
+    conn = get_conn()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, name, category, brand, description,
+               old_price_number, technical_image
+        FROM products
+        WHERE id = ?
+    """, (product_id,))
+
+    product = cursor.fetchone()
+
+    if not product:
+        conn.close()
+        return redirect("/admin/products")
+
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        category = request.form.get("category", "").strip()
+        brand = request.form.get("brand", "").strip()
+        description = request.form.get("description", "").strip()
+
+        variants_input = request.form.get("variants", "").strip()
+        colors_input = request.form.get("colors", "").strip()
+        main_image = request.form.get("main_image", "").strip()
+
+        variant_lines = [
+            line.strip()
+            for line in variants_input.splitlines()
+            if line.strip()
+        ]
+
+        if not variant_lines:
+            conn.close()
+            return "Vui lòng nhập ít nhất 1 phiên bản sản phẩm"
+
+        first_variant_parts = [part.strip() for part in variant_lines[0].split("|")]
+
+        first_price_input = first_variant_parts[2] if len(first_variant_parts) > 2 else "0"
+        first_old_price_input = first_variant_parts[3] if len(first_variant_parts) > 3 else ""
+
+        price_number = parse_price_to_number(first_price_input)
+        old_price_number = parse_price_to_number(first_old_price_input)
+
+        old_price_text = format_vnd(old_price_number) if old_price_number else None
+
+        has_discount = 1 if old_price_number and old_price_number > price_number else 0
+        discount = None
+
+        if has_discount and price_number > 0:
+            discount_percent = round((old_price_number - price_number) * 100 / old_price_number)
+            discount = f"-{discount_percent}%"
+
+        color_lines = [
+            line.strip()
+            for line in colors_input.splitlines()
+            if line.strip()
+        ]
+
+        if not color_lines:
+            color_lines = ["Mặc định | #000000 | /static/img/no-image.png"]
+
+        first_color_parts = [part.strip() for part in color_lines[0].split("|")]
+        first_color_image = first_color_parts[2] if len(first_color_parts) > 2 else "/static/img/no-image.png"
+
+        if not main_image:
+            main_image = first_color_image
+
+        try:
+            cursor.execute("""
+                UPDATE products
+                SET name = ?,
+                    category = ?,
+                    brand = ?,
+                    description = ?,
+                    old_price_text = ?,
+                    old_price_number = ?,
+                    discount = ?,
+                    has_discount = ?,
+                    technical_image = ?
+                WHERE id = ?
+            """, (
+                name,
+                category,
+                brand,
+                description,
+                old_price_text,
+                old_price_number if old_price_number else None,
+                discount,
+                has_discount,
+                main_image,
+                product_id
+            ))
+
+            cursor.execute("""
+                DELETE FROM product_storages
+                WHERE product_id = ?
+            """, (product_id,))
+
+            display_order = 1
+
+            for line in variant_lines:
+                parts = [part.strip() for part in line.split("|")]
+
+                storage = parts[0] if len(parts) > 0 else "Mặc định"
+                ram = parts[1] if len(parts) > 1 else ""
+                price_input = parts[2] if len(parts) > 2 else "0"
+
+                price_number_variant = parse_price_to_number(price_input)
+                price_text_variant = format_vnd(price_number_variant)
+
+                cursor.execute("""
+                    INSERT INTO product_storages (
+                        product_id,
+                        storage,
+                        ram,
+                        price_text,
+                        price_number,
+                        display_order
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (
+                    product_id,
+                    storage,
+                    ram,
+                    price_text_variant,
+                    price_number_variant,
+                    display_order
+                ))
+
+                display_order += 1
+
+            cursor.execute("""
+                DELETE FROM product_color_images
+                WHERE product_id = ?
+            """, (product_id,))
+
+            cursor.execute("""
+                DELETE FROM product_colors
+                WHERE product_id = ?
+            """, (product_id,))
+
+            color_order = 1
+
+            for line in color_lines:
+                parts = [part.strip() for part in line.split("|")]
+
+                color_name = parts[0] if len(parts) > 0 else "Mặc định"
+                color_code = parts[1] if len(parts) > 1 else "#000000"
+                color_image = parts[2] if len(parts) > 2 else "/static/img/no-image.png"
+
+                gallery_text = parts[3] if len(parts) > 3 else color_image
+
+                gallery_images = [
+                    img.strip()
+                    for img in gallery_text.split(",")
+                    if img.strip()
+                ]
+
+                if not gallery_images:
+                    gallery_images = [color_image]
+
+                cursor.execute("""
+                    INSERT INTO product_colors (
+                        product_id,
+                        color_name,
+                        color_code,
+                        main_image,
+                        display_order
+                    )
+                    OUTPUT INSERTED.id
+                    VALUES (?, ?, ?, ?, ?)
+                """, (
+                    product_id,
+                    color_name,
+                    color_code,
+                    color_image,
+                    color_order
+                ))
+
+                color_id = cursor.fetchone()[0]
+
+                image_order = 1
+
+                for gallery_image in gallery_images:
+                    cursor.execute("""
+                        INSERT INTO product_color_images (
+                            product_id,
+                            color_id,
+                            image_url,
+                            display_order
+                        )
+                        VALUES (?, ?, ?, ?)
+                    """, (
+                        product_id,
+                        color_id,
+                        gallery_image,
+                        image_order
+                    ))
+
+                    image_order += 1
+
+                color_order += 1
+
+            conn.commit()
+            conn.close()
+
+            return redirect("/admin/products")
+
+        except Exception as e:
+            conn.rollback()
+            conn.close()
+            return f"Lỗi sửa sản phẩm: {e}"
+
+    cursor.execute("""
+        SELECT storage, ram, price_number
+        FROM product_storages
+        WHERE product_id = ?
+        ORDER BY display_order
+    """, (product_id,))
+
+    storage_rows = cursor.fetchall()
+
+    variant_lines = []
+
+    for index, row in enumerate(storage_rows):
+        storage = row[0] or ""
+        ram = row[1] or ""
+        price_number = int(row[2] or 0)
+
+        if index == 0 and product[5]:
+            old_price_number = int(product[5] or 0)
+            variant_lines.append(f"{storage} | {ram} | {price_number} | {old_price_number}")
+        else:
+            variant_lines.append(f"{storage} | {ram} | {price_number}")
+
+    variants_text = "\n".join(variant_lines)
+
+    cursor.execute("""
+        SELECT id, color_name, color_code, main_image
+        FROM product_colors
+        WHERE product_id = ?
+        ORDER BY display_order
+    """, (product_id,))
+
+    color_rows = cursor.fetchall()
+
+    color_lines = []
+
+    for color in color_rows:
+        color_id = color[0]
+        color_name = color[1] or ""
+        color_code = color[2] or ""
+        main_image = color[3] or ""
+
+        cursor.execute("""
+            SELECT image_url
+            FROM product_color_images
+            WHERE color_id = ?
+            ORDER BY display_order
+        """, (color_id,))
+
+        gallery_images = [
+            image_row[0]
+            for image_row in cursor.fetchall()
+            if image_row[0]
+        ]
+
+        gallery_text = ", ".join(gallery_images)
+
+        if gallery_text:
+            color_lines.append(f"{color_name} | {color_code} | {main_image} | {gallery_text}")
+        else:
+            color_lines.append(f"{color_name} | {color_code} | {main_image}")
+
+    colors_text = "\n".join(color_lines)
+
+    product_data = {
+        "id": product[0],
+        "name": product[1],
+        "category": product[2],
+        "brand": product[3],
+        "description": product[4] or "",
+        "main_image": product[6] or "",
+        "variants_text": variants_text,
+        "colors_text": colors_text
+    }
+
+    conn.close()
+
+    return render_template("admin/product_edit.html", product=product_data)
+@app.route("/admin/products/<int:product_id>/delete", methods=["GET", "POST"])
+def admin_delete_product(product_id):
+    if not session.get("account_id"):
+        return redirect("/signin")
+
+    if session.get("role") != "admin":
+        return redirect("/")
+
+    conn = get_conn()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            DELETE FROM product_spec_items
+            WHERE group_id IN (
+                SELECT id FROM product_spec_groups WHERE product_id = ?
+            )
+        """, (product_id,))
+
+        cursor.execute("""
+            DELETE FROM product_spec_groups
+            WHERE product_id = ?
+        """, (product_id,))
+
+        cursor.execute("""
+            DELETE FROM product_color_images
+            WHERE product_id = ?
+        """, (product_id,))
+
+        cursor.execute("""
+            DELETE FROM product_colors
+            WHERE product_id = ?
+        """, (product_id,))
+
+        cursor.execute("""
+            DELETE FROM product_storages
+            WHERE product_id = ?
+        """, (product_id,))
+
+        cursor.execute("""
+            DELETE FROM product_reviews
+            WHERE product_id = ?
+        """, (product_id,))
+
+        cursor.execute("""
+            UPDATE order_items
+            SET product_id = NULL
+            WHERE product_id = ?
+        """, (product_id,))
+
+        cursor.execute("""
+            DELETE FROM products
+            WHERE id = ?
+        """, (product_id,))
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        conn.close()
+        return f"Lỗi xóa sản phẩm: {e}"
+
+    conn.close()
+
+    return redirect("/admin/products")
+@app.route("/admin/products/<int:product_id>/specs", methods=["GET", "POST"])
+def admin_product_specs(product_id):
+    
+    if not session.get("account_id"):
+        return redirect("/signin")
+
+    if session.get("role") != "admin":
+        return redirect("/")
+
+    conn = get_conn()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id, name FROM products WHERE id = ?", (product_id,))
+    product = cursor.fetchone()
+
+    if not product:
+        conn.close()
+        return redirect("/admin/products")
+
+    if request.method == "POST":
+        raw_specs = request.form.get("specs", "").strip()
+
+        # Xóa thông số cũ của sản phẩm
+        cursor.execute("""
+            DELETE FROM product_spec_items
+            WHERE group_id IN (
+                SELECT id FROM product_spec_groups WHERE product_id = ?
+            )
+        """, (product_id,))
+
+        cursor.execute("""
+            DELETE FROM product_spec_groups
+            WHERE product_id = ?
+        """, (product_id,))
+
+        current_group_id = None
+        group_order = 1
+        item_order = 1
+
+        for line in raw_specs.splitlines():
+            line = line.strip()
+
+            if not line:
+                continue
+
+            # Dòng không có dấu ":" thì xem là tên nhóm
+            if ":" not in line:
+                group_title = line
+
+                cursor.execute("""
+                    INSERT INTO product_spec_groups (
+                        product_id,
+                        title,
+                        display_order
+                    )
+                    OUTPUT INSERTED.id
+                    VALUES (?, ?, ?)
+                """, (product_id, group_title, group_order))
+
+                current_group_id = cursor.fetchone()[0]
+                group_order += 1
+                item_order = 1
+
+            else:
+                if current_group_id is None:
+                    cursor.execute("""
+                        INSERT INTO product_spec_groups (
+                            product_id,
+                            title,
+                            display_order
+                        )
+                        OUTPUT INSERTED.id
+                        VALUES (?, ?, ?)
+                    """, (product_id, "Thông số kỹ thuật", group_order))
+
+                    current_group_id = cursor.fetchone()[0]
+                    group_order += 1
+                    item_order = 1
+
+                label, value = line.split(":", 1)
+
+                label = label.strip()
+                value = value.strip()
+
+                if label and value:
+                    cursor.execute("""
+                        INSERT INTO product_spec_items (
+                            group_id,
+                            label,
+                            value,
+                            display_order
+                        )
+                        VALUES (?, ?, ?, ?)
+                    """, (current_group_id, label, value, item_order))
+
+                    item_order += 1
+
+        conn.commit()
+        conn.close()
+
+        return redirect("/admin/products")
+
+    # Lấy thông số cũ để hiện lại nếu có
+    cursor.execute("""
+        SELECT 
+            g.title,
+            i.label,
+            i.value
+        FROM product_spec_groups g
+        LEFT JOIN product_spec_items i ON g.id = i.group_id
+        WHERE g.product_id = ?
+        ORDER BY g.display_order, i.display_order
+    """, (product_id,))
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    existing_lines = []
+    last_group = None
+
+    for row in rows:
+        group_title = row[0]
+        label = row[1]
+        value = row[2]
+
+        if group_title != last_group:
+            if existing_lines:
+                existing_lines.append("")
+            existing_lines.append(group_title)
+            last_group = group_title
+
+        if label and value:
+            existing_lines.append(f"{label}: {value}")
+
+    existing_specs = "\n".join(existing_lines)
+
+    return render_template(
+        "admin/product_specs.html",
+        product_id=product[0],
+        product_name=product[1],
+        existing_specs=existing_specs
+    )
 # =========================
 # 🔐 OTP
 # =========================
@@ -1632,7 +2463,10 @@ def parse_int(value):
 def create_order_api():
     if not session.get("account_id"):
         return jsonify({"success": False, "message": "Bạn cần đăng nhập."}), 401
-
+    
+    if is_admin():
+        return jsonify({"success": False, "message": "Admin không thể tạo đơn hàng."}), 403
+    
     data = request.get_json()
     items = data.get("items", [])
 
@@ -1720,12 +2554,21 @@ def create_order_api():
 
 @app.route("/cart")
 def cart():
+    if not session.get("account_id"):
+        return redirect("/signin")
+
+    if is_admin():
+        return redirect("/admin")
+
     return render_template("cart.html")
 
 @app.route("/checkout")
 def checkout():
     if not session.get("account_id"):
         return redirect("/signin")
+
+    if is_admin():
+        return redirect("/admin")
 
     return render_template("checkout.html")
 

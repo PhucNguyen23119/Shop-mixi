@@ -1,0 +1,409 @@
+.admin-page {
+  width: min(1200px, calc(100% - 40px));
+  margin: 36px auto 60px;
+  padding: 0;
+}
+
+.admin-hero {
+  background: linear-gradient(135deg, #0f4cdb, #2563eb, #38bdf8);
+  border-radius: 28px;
+  padding: 34px;
+  color: white;
+  box-shadow: 0 18px 45px rgba(37, 99, 235, 0.28);
+  margin-bottom: 28px;
+}
+
+.admin-hero h1 {
+  font-size: 36px;
+  font-weight: 900;
+  margin: 0 0 8px;
+  letter-spacing: -0.5px;
+}
+
+.admin-hero p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 16px;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+  margin-bottom: 28px;
+}
+
+.admin-card {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e5edff;
+  transition: 0.25s ease;
+}
+
+.admin-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.12);
+}
+
+.admin-card .label {
+  color: #64748b;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.admin-card .number {
+  font-size: 34px;
+  font-weight: 900;
+}
+
+.text-blue {
+  color: #2563eb;
+}
+
+.text-green {
+  color: #16a34a;
+}
+
+.text-purple {
+  color: #9333ea;
+}
+
+.text-red {
+  color: #dc2626;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 22px;
+  border-radius: 14px;
+  font-weight: 800;
+  text-decoration: none;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.admin-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.admin-btn.blue {
+  background: #2563eb;
+}
+
+.admin-btn.green {
+  background: #16a34a;
+}
+
+.admin-btn.gray {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.admin-btn.orange {
+  background: #f59e0b;
+}
+
+.admin-btn.red {
+  background: #dc2626;
+}
+
+.admin-section {
+  background: white;
+  border-radius: 24px;
+  padding: 26px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e5edff;
+}
+
+.admin-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.admin-title-row h1 {
+  font-size: 32px;
+  color: #1e3a8a;
+  font-weight: 900;
+  margin: 0;
+}
+
+.admin-title-row p {
+  margin-top: 6px;
+  color: #64748b;
+}
+
+.admin-form {
+  display: grid;
+  gap: 20px;
+}
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 42px;
+  row-gap: 26px;
+}
+
+.admin-field label {
+  display: block;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 8px;
+}
+
+.admin-field input,
+.admin-field select,
+.admin-field textarea {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  font-size: 15px;
+  outline: none;
+  transition: 0.2s ease;
+  background: #f8fafc;
+}
+
+.admin-field input:focus,
+.admin-field select:focus,
+.admin-field textarea:focus {
+  border-color: #2563eb;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.admin-table-wrap {
+  background: white;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e5edff;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table thead {
+  background: #eff6ff;
+}
+
+.admin-table th {
+  padding: 16px;
+  text-align: left;
+  color: #1e3a8a;
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.admin-table td {
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: middle;
+}
+
+.admin-product-img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.admin-badge {
+  display: inline-block;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-back {
+  margin-top: 24px;
+}
+
+.admin-back a {
+  color: #2563eb;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+@media (max-width: 1000px) {
+  .admin-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .admin-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-hero h1 {
+    font-size: 28px;
+  }
+
+  .admin-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+}
+.admin-page *,
+.admin-section *,
+.admin-form *,
+.admin-form-grid *,
+.admin-field *,
+.admin-field input,
+.admin-field select,
+.admin-field textarea {
+  box-sizing: border-box;
+}
+
+/* ===== Fix form thêm sản phẩm ===== */
+.admin-form-page {
+  max-width: 1040px;
+}
+
+.admin-product-form {
+  padding: 32px;
+}
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 42px;
+  row-gap: 26px;
+}
+
+.admin-field {
+  min-width: 0;
+}
+
+.admin-field label {
+  display: block;
+  font-weight: 750;
+  color: #1f2937;
+  margin-bottom: 9px;
+}
+
+.admin-field input,
+.admin-field select,
+.admin-field textarea {
+  width: 100%;
+  min-height: 46px;
+  box-sizing: border-box;
+  padding: 13px 15px;
+  border: 1px solid #cbd5e1;
+  border-radius: 13px;
+  font-size: 15px;
+  outline: none;
+  background: #ffffff;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.admin-field input::placeholder,
+.admin-field textarea::placeholder {
+  color: #64748b;
+}
+
+.admin-field input:focus,
+.admin-field select:focus,
+.admin-field textarea:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.admin-field-full {
+  margin-top: 28px;
+}
+
+.admin-field-full textarea {
+  min-height: 112px;
+  resize: vertical;
+}
+
+.admin-form-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 30px;
+}
+
+.admin-form-actions .admin-btn {
+  min-width: 136px;
+}
+
+@media (max-width: 800px) {
+  .admin-product-form {
+    padding: 24px;
+  }
+
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+}
+.admin-page,
+.admin-page input,
+.admin-page select,
+.admin-page textarea,
+.admin-page button,
+.admin-page a {
+  font-family: "Be Vietnam Pro", Arial, sans-serif;
+}
+
+.admin-page h1,
+.admin-page h2,
+.admin-page h3 {
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+.admin-field label {
+  font-weight: 700;
+}
+.admin-field-full {
+  grid-column: 1 / -1;
+  margin-top: 24px;
+}
+
+.admin-product-form textarea {
+  min-height: 420px;
+  resize: vertical;
+  line-height: 1.6;
+  font-family: "Be Vietnam Pro", Arial, sans-serif;
+}
+
+.admin-form-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 28px;
+}

@@ -12,7 +12,19 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     />
-    {% block extra_head %}{% endblock %}
+    {% block extra_head %}{% endblock %} {% if request.path.startswith('/admin')
+    %}
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/admin.css') }}"
+    />
+    {% endif %}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
   </head>
 
   <body>
@@ -31,22 +43,29 @@
         <div class="nav-right">
           {% if session.get("account_id") %}
           <div class="account-dropdown">
-            <a href="/infor" class="nav-item login-item">
+            <a
+              href="{% if session.get('role') == 'admin' %}/admin{% else %}/infor{% endif %}"
+              class="nav-item login-item"
+            >
               <img
                 src="{{ url_for('avatar', account_id=session.get('account_id')) }}"
                 class="header-avatar"
               />
 
               <span>
-                {% if session.get("gender") == "Nữ" %} C. {% else %} A. {% endif
-                %} {{ session.get("last_name") }}
+                {% if session.get("role") == "admin" %} Admin {% else %} {% if
+                session.get("gender") == "Nữ" %} C. {% else %} A. {% endif %} {{
+                session.get("last_name") }} {% endif %}
               </span>
             </a>
 
             <div class="account-menu">
+              {% if session.get("role") == "admin" %}
+              <a href="/admin" class="account-menu-item"> Trang quản trị </a>
+              {% else %}
               <a href="/infor" class="account-menu-item"> Tài khoản của tôi </a>
-
               <a href="/orders" class="account-menu-item"> Đơn mua </a>
+              {% endif %}
 
               <a href="/logout" class="account-menu-item"> Đăng xuất </a>
             </div>
@@ -59,11 +78,11 @@
             <span>Đăng nhập</span>
           </a>
 
-          {% endif %}
-
+          {% endif %} {% if session.get("role") != "admin" %}
           <a href="/cart" class="nav-item icon-item">
             <img src="{{ url_for('static', filename='img/cart.png') }}" />
           </a>
+          {% endif %}
         </div>
       </div>
     </div>

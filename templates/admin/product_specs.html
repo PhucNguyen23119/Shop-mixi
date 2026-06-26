@@ -1,0 +1,47 @@
+{% extends "base.html" %} {% block title %}Thông số sản phẩm{% endblock %} {%
+block content %}
+<div class="admin-page admin-form-page">
+  <div class="admin-title-row">
+    <div>
+      <h1>Thông số sản phẩm</h1>
+      <p>Nhập thông số kỹ thuật cho: <strong>{{ product_name }}</strong></p>
+    </div>
+
+    <a href="/admin/products" class="admin-btn gray">← Quay lại</a>
+  </div>
+
+  <form method="POST" class="admin-section admin-product-form">
+    <div class="admin-field admin-field-full">
+      <label>Thông số kỹ thuật</label>
+
+      <textarea
+        name="specs"
+        rows="22"
+        placeholder="Nhập thông số theo dạng:
+
+Cấu hình & Bộ nhớ
+Hệ điều hành: iOS 26
+Chipset: Apple A19
+Dung lượng RAM: 8 GB
+Bộ nhớ trong: 256 GB
+
+Màn hình
+Kích thước màn hình: 6.1 inches
+Công nghệ màn hình: OLED
+Tần số quét: 120Hz
+
+Camera sau
+Camera sau: Chính 48MP
+Quay video: 4K 60fps"
+      >
+{{ existing_specs }}</textarea
+      >
+    </div>
+
+    <div class="admin-form-actions">
+      <button type="submit" class="admin-btn blue">Lưu thông số</button>
+      <a href="/admin/products" class="admin-btn gray">Hủy</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

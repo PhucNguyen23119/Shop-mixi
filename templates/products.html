@@ -1,65 +1,83 @@
-{% extends "base.html" %}
-{% block title %}Sản phẩm{% endblock %}
-{% block extra_head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
-{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% block title %}Sản phẩm{% endblock %} {% block
+extra_head %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/shop.css') }}"
+/>
+{% endblock %} {% block content %}
 <div class="shop-page">
-<main class="products-page">
-<section class="products-banner">
-<img alt="Banner sản phẩm" src="/static/img/banner3.jpg"/>
-</section>
-<section class="products-content">
-<section class="products-main">
-<div class="brand-tabs"></div>
-<div class="products-toolbar">
-<h1 class="products-title">Tất cả sản phẩm</h1>
-<label>
-              Sắp xếp theo:
-              <select class="sort-select">
-<option value="recommend">Khuyến nghị</option>
-<option value="price-asc">Giá thấp đến cao</option>
-<option value="price-desc">Giá cao đến thấp</option>
-</select>
-</label>
+  <main class="products-page">
+    <section class="products-banner">
+      <img alt="Banner sản phẩm" src="/static/img/banner3.jpg" />
+    </section>
+    <section class="products-content">
+      <section class="products-main">
+        <div class="brand-tabs"></div>
+        <div class="products-toolbar">
+          <h1 class="products-title">Tất cả sản phẩm</h1>
+          <label>
+            Sắp xếp theo:
+            <select class="sort-select">
+              <option value="recommend">Khuyến nghị</option>
+              <option value="price-asc">Giá thấp đến cao</option>
+              <option value="price-desc">Giá cao đến thấp</option>
+            </select>
+          </label>
+        </div>
+        <section class="all-products"></section>
+      </section>
+      <aside class="filter-sidebar">
+        <h2>Bộ lọc</h2>
+        <p>Điều chỉnh tìm kiếm của bạn</p>
+        <div class="filter-group">
+          <h3>Khoảng giá</h3>
+          <div class="price-slider">
+            <input
+              id="max-price"
+              max="200000000"
+              min="0"
+              type="range"
+              value="200000000"
+            />
+            <input
+              id="min-price"
+              max="200000000"
+              min="0"
+              type="range"
+              value="0"
+            />
+          </div>
+          <div class="price-box">
+            <div class="price-value">
+              <span>Min (đ)</span>
+              <strong id="min-price-text"> 0 </strong>
+            </div>
+            <div class="price-value">
+              <span>Max (đ)</span>
+              <strong id="max-price-text"> 200.000.000 </strong>
+            </div>
+          </div>
+        </div>
+        <div class="filter-group">
+          <h3>Dung lượng</h3>
+          <label
+            ><input class="capacity-check" type="checkbox" value="128" />
+            128GB</label
+          >
+          <label
+            ><input class="capacity-check" type="checkbox" value="256" />
+            256GB</label
+          >
+          <label
+            ><input class="capacity-check" type="checkbox" value="512" />
+            512GB</label
+          >
+        </div>
+        <button class="apply-filter-btn">Áp dụng bộ lọc</button>
+      </aside>
+    </section>
+  </main>
 </div>
-<section class="all-products"></section>
-</section>
-<aside class="filter-sidebar">
-<h2>Bộ lọc</h2>
-<p>Điều chỉnh tìm kiếm của bạn</p>
-<div class="filter-group">
-<h3>Khoảng giá</h3>
-<div class="price-slider">
-<input id="max-price" max="200000000" min="5000000" type="range" value="200000000"/>
-<input id="min-price" max="200000000" min="5000000" type="range" value="5000000"/>
-</div>
-<div class="price-box">
-<div class="price-value">
-<span>Min (đ)</span>
-<strong id="min-price-text"> 5.000.000 </strong>
-</div>
-<div class="price-value">
-<span>Max (đ)</span>
-<strong id="max-price-text"> 200.000.000 </strong>
-</div>
-</div>
-</div>
-<div class="filter-group">
-<h3>Dung lượng</h3>
-<label><input class="capacity-check" type="checkbox" value="128"/>
-              128GB</label>
-<label><input class="capacity-check" type="checkbox" value="256"/>
-              256GB</label>
-<label><input class="capacity-check" type="checkbox" value="512"/>
-              512GB</label>
-</div>
-<button class="apply-filter-btn">Áp dụng bộ lọc</button>
-</aside>
-</section>
-</main>
-</div>
-{% endblock %}
-{% block extra_scripts %}
+{% endblock %} {% block extra_scripts %}
 <script src="{{ url_for('static', filename='js/shop.js') }}"></script>
 {% endblock %}

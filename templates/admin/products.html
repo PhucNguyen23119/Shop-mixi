@@ -1,0 +1,164 @@
+{% extends "base.html" %} {% block title %}Quản lý sản phẩm{% endblock %} {%
+block content %}
+<div style="max-width: 1250px; margin: 40px auto; padding: 0 20px">
+  <div
+    style="
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    "
+  >
+    <div>
+      <h1 style="font-size: 32px; font-weight: 800; color: #1e3a8a">
+        Quản lý sản phẩm
+      </h1>
+      <p style="color: #64748b; margin-top: 6px">
+        Danh sách sản phẩm đang có trong hệ thống
+      </p>
+    </div>
+
+    <a
+      href="/admin/products/add"
+      style="
+        background: #2563eb;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 700;
+      "
+    >
+      + Thêm sản phẩm
+    </a>
+  </div>
+
+  <div
+    style="
+      background: white;
+      border-radius: 18px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    "
+  >
+    <table style="width: 100%; border-collapse: collapse">
+      <thead style="background: #eff6ff">
+        <tr>
+          <th style="padding: 14px; text-align: left">ID</th>
+          <th style="padding: 14px; text-align: left">Ảnh</th>
+          <th style="padding: 14px; text-align: left">Tên sản phẩm</th>
+          <th style="padding: 14px; text-align: left">Danh mục</th>
+          <th style="padding: 14px; text-align: left">Thương hiệu</th>
+          <th style="padding: 14px; text-align: left">Phiên bản</th>
+          <th style="padding: 14px; text-align: left">Giá</th>
+          <th style="padding: 14px; text-align: center">Thao tác</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for p in products %}
+        <tr style="border-bottom: 1px solid #e5e7eb">
+          <td style="padding: 14px">{{ p.id }}</td>
+
+          <td style="padding: 14px">
+            <img
+              src="{{ p.main_image }}"
+              alt="{{ p.name }}"
+              style="width: 70px; height: 70px; object-fit: contain"
+            />
+          </td>
+
+          <td style="padding: 14px; font-weight: 700">
+            {{ p.name }} {% if p.is_new %}
+            <span
+              style="
+                background: red;
+                color: white;
+                font-size: 12px;
+                padding: 3px 7px;
+                border-radius: 6px;
+                margin-left: 6px;
+              "
+            >
+              New
+            </span>
+            {% endif %}
+          </td>
+
+          <td style="padding: 14px">{{ p.category }}</td>
+          <td style="padding: 14px">{{ p.brand }}</td>
+
+          <td style="padding: 14px">
+            {{ p.storage }} {% if p.ram %} / {{ p.ram }} {% endif %}
+          </td>
+
+          <td style="padding: 14px; color: red; font-weight: 800">
+            {{ p.price_text }}
+          </td>
+
+          <td style="padding: 14px; text-align: center">
+            <a
+              href="/admin/products/{{ p.id }}/specs"
+              class="admin-btn blue"
+              style="padding: 8px 12px; font-size: 13px"
+            >
+              Thông số
+            </a>
+
+            <a
+              href="/admin/products/{{ p.id }}/edit"
+              style="
+                background: #f59e0b;
+                color: white;
+                padding: 8px 12px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+              "
+            >
+              Sửa
+            </a>
+
+            <a
+              href="/admin/products/{{ p.id }}/delete"
+              onclick="
+                return confirm('Bạn có chắc muốn xóa sản phẩm này không?');
+              "
+              style="
+                background: #dc2626;
+                color: white;
+                padding: 8px 12px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                margin-left: 6px;
+              "
+            >
+              Xóa
+            </a>
+          </td>
+        </tr>
+        {% endfor %} {% if products|length == 0 %}
+        <tr>
+          <td
+            colspan="8"
+            style="padding: 30px; text-align: center; color: #64748b"
+          >
+            Chưa có sản phẩm nào.
+          </td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top: 24px">
+    <a
+      href="/admin"
+      style="color: #2563eb; font-weight: 700; text-decoration: none"
+    >
+      ← Quay lại trang quản trị
+    </a>
+  </div>
+</div>
+{% endblock %}

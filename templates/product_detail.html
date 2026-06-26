@@ -82,6 +82,7 @@ block extra_head %}
             </div>
           </div>
         </div>
+        {% if session.get("role") != "admin" %}
         <div class="quantity-cart">
           <div class="quantity-box">
             <button type="button" class="qty-minus">-</button>
@@ -93,6 +94,38 @@ block extra_head %}
         </div>
 
         <button type="button" class="buy-now-btn">Mua ngay</button>
+        {% else %}
+        <div
+          style="
+            margin-top: 24px;
+            padding: 18px;
+            border: 1px solid #bfdbfe;
+            background: #eff6ff;
+            color: #1e40af;
+            border-radius: 12px;
+            font-weight: 700;
+          "
+        >
+          Tài khoản admin chỉ dùng để quản trị, không được mua hàng.
+        </div>
+
+        <a
+          href="/admin"
+          style="
+            display: block;
+            margin-top: 14px;
+            text-align: center;
+            padding: 14px;
+            background: #2563eb;
+            color: white;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+          "
+        >
+          Về trang quản trị
+        </a>
+        {% endif %}
       </section>
     </section>
     <section class="detail-extra">
