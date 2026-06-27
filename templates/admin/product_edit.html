@@ -10,7 +10,11 @@ content %}
     <a href="/admin/products" class="admin-btn gray">← Quay lại</a>
   </div>
 
-  <form method="POST" class="admin-section admin-product-form">
+  <form
+    method="POST"
+    class="admin-section admin-product-form"
+    id="adminProductForm"
+  >
     <div class="admin-form-grid">
       <div class="admin-field">
         <label>Tên sản phẩm</label>
@@ -67,15 +71,36 @@ content %}
       </div>
 
       <div class="admin-field admin-field-full">
-        <label>Danh sách phiên bản</label>
+        <label>Phiên bản sản phẩm</label>
+        <p class="admin-help-text">
+          Có thể thêm nhiều phiên bản. Giá cũ có thể để trống.
+        </p>
+
         <!-- prettier-ignore -->
-        <textarea name="variants" rows="5" required>{{ product.variants_text }}</textarea>
+        <textarea name="variants" id="variantsInput" hidden>{{ product.variants_text }}</textarea>
+
+        <div id="variantRows" class="dynamic-list"></div>
+
+        <button type="button" class="admin-mini-btn blue" id="addVariantBtn">
+          + Thêm phiên bản
+        </button>
       </div>
 
       <div class="admin-field admin-field-full">
-        <label>Danh sách màu sắc</label>
+        <label>Màu sắc & hình ảnh</label>
+        <p class="admin-help-text">
+          Ảnh gallery nhập mỗi link một dòng. Khi lưu, hệ thống tự chuyển về
+          định dạng SQL.
+        </p>
+
         <!-- prettier-ignore -->
-        <textarea name="colors" rows="6" required>{{ product.colors_text }}</textarea>
+        <textarea name="colors" id="colorsInput" hidden>{{ product.colors_text }}</textarea>
+
+        <div id="colorRows" class="dynamic-list"></div>
+
+        <button type="button" class="admin-mini-btn blue" id="addColorBtn">
+          + Thêm màu
+        </button>
       </div>
     </div>
 
@@ -90,4 +115,6 @@ content %}
     </div>
   </form>
 </div>
+
+<script src="{{ url_for('static', filename='js/admin_product_form.js') }}"></script>
 {% endblock %}

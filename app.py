@@ -1526,9 +1526,21 @@ def admin_add_product():
                 storage = parts[0] if len(parts) > 0 else "Mặc định"
                 ram = parts[1] if len(parts) > 1 else ""
                 price_input = parts[2] if len(parts) > 2 else "0"
+                old_price_input = parts[3] if len(parts) > 3 else ""
 
                 price_number_variant = parse_price_to_number(price_input)
                 price_text_variant = format_vnd(price_number_variant)
+
+                old_price_number_variant = parse_price_to_number(old_price_input)
+                old_price_text_variant = format_vnd(old_price_number_variant) if old_price_number_variant else None
+
+                discount_variant = None
+
+                if old_price_number_variant and old_price_number_variant > price_number_variant and price_number_variant > 0:
+                    discount_percent_variant = round(
+                        (old_price_number_variant - price_number_variant) * 100 / old_price_number_variant
+                    )
+                    discount_variant = f"-{discount_percent_variant}%"
 
                 cursor.execute("""
                     INSERT INTO product_storages (
@@ -1537,15 +1549,21 @@ def admin_add_product():
                         ram,
                         price_text,
                         price_number,
+                        old_price_text,
+                        old_price_number,
+                        discount,
                         display_order
                     )
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     product_id,
                     storage,
                     ram,
                     price_text_variant,
                     price_number_variant,
+                    old_price_text_variant,
+                    old_price_number_variant if old_price_number_variant else None,
+                    discount_variant,
                     display_order
                 ))
 
@@ -1634,6 +1652,7 @@ def admin_edit_product(product_id):
         return redirect("/admin/products")
 
     if request.method == "POST":
+        print("ĐÃ BẤM LƯU SỬA SẢN PHẨM", request.form, flush=True)
         name = request.form.get("name", "").strip()
         category = request.form.get("category", "").strip()
         brand = request.form.get("brand", "").strip()
@@ -1724,9 +1743,21 @@ def admin_edit_product(product_id):
                 storage = parts[0] if len(parts) > 0 else "Mặc định"
                 ram = parts[1] if len(parts) > 1 else ""
                 price_input = parts[2] if len(parts) > 2 else "0"
+                old_price_input = parts[3] if len(parts) > 3 else ""
 
                 price_number_variant = parse_price_to_number(price_input)
                 price_text_variant = format_vnd(price_number_variant)
+
+                old_price_number_variant = parse_price_to_number(old_price_input)
+                old_price_text_variant = format_vnd(old_price_number_variant) if old_price_number_variant else None
+
+                discount_variant = None
+
+                if old_price_number_variant and old_price_number_variant > price_number_variant and price_number_variant > 0:
+                    discount_percent_variant = round(
+                        (old_price_number_variant - price_number_variant) * 100 / old_price_number_variant
+                    )
+                    discount_variant = f"-{discount_percent_variant}%"
 
                 cursor.execute("""
                     INSERT INTO product_storages (
@@ -1735,15 +1766,21 @@ def admin_edit_product(product_id):
                         ram,
                         price_text,
                         price_number,
+                        old_price_text,
+                        old_price_number,
+                        discount,
                         display_order
                     )
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     product_id,
                     storage,
                     ram,
                     price_text_variant,
                     price_number_variant,
+                    old_price_text_variant,
+                    old_price_number_variant if old_price_number_variant else None,
+                    discount_variant,
                     display_order
                 ))
 
@@ -1832,7 +1869,7 @@ def admin_edit_product(product_id):
             return f"Lỗi sửa sản phẩm: {e}"
 
     cursor.execute("""
-        SELECT storage, ram, price_number
+        SELECT storage, ram, price_number, old_price_number
         FROM product_storages
         WHERE product_id = ?
         ORDER BY display_order
@@ -1842,13 +1879,13 @@ def admin_edit_product(product_id):
 
     variant_lines = []
 
-    for index, row in enumerate(storage_rows):
+    for row in storage_rows:
         storage = row[0] or ""
         ram = row[1] or ""
         price_number = int(row[2] or 0)
+        old_price_number = int(row[3] or 0)
 
-        if index == 0 and product[5]:
-            old_price_number = int(product[5] or 0)
+        if old_price_number:
             variant_lines.append(f"{storage} | {ram} | {price_number} | {old_price_number}")
         else:
             variant_lines.append(f"{storage} | {ram} | {price_number}")

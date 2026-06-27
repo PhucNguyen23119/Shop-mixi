@@ -1057,7 +1057,23 @@ async function renderDetailPage() {
       reviewCount.textContent = "0 lượt đánh giá";
       reviewStars.textContent = "☆☆☆☆☆";
       commentTitle.textContent = "0 Bình luận";
-      reviewBars.innerHTML = "";
+
+      reviewBars.innerHTML = [5, 4, 3, 2, 1]
+        .map((star) => {
+          return `
+        <div class="review-bar-row">
+          <span>${star} ★</span>
+
+          <div class="review-bar">
+            <div style="width: 0%"></div>
+          </div>
+
+          <small>0 đánh giá</small>
+        </div>
+      `;
+        })
+        .join("");
+
       reviewList.innerHTML = "<p>Chưa có đánh giá nào.</p>";
       reviewPagination.innerHTML = "";
       return;

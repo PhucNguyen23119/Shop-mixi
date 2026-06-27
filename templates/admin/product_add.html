@@ -10,7 +10,11 @@ content %}
     <a href="/admin/products" class="admin-btn gray">← Quay lại</a>
   </div>
 
-  <form method="POST" class="admin-section admin-product-form">
+  <form
+    method="POST"
+    class="admin-section admin-product-form"
+    id="adminProductForm"
+  >
     <div class="admin-form-grid">
       <div class="admin-field">
         <label>Tên sản phẩm</label>
@@ -38,33 +42,43 @@ content %}
 
       <div class="admin-field">
         <label>Ảnh chính</label>
-        <input name="main_image" placeholder="/static/img/ten-anh.jpg" />
+        <input
+          name="main_image"
+          placeholder="/static/img/ten-anh.jpg hoặc link ảnh"
+        />
       </div>
 
       <div class="admin-field admin-field-full">
-        <label>Danh sách phiên bản</label>
-        <textarea
-          name="variants"
-          rows="5"
-          required
-          placeholder="Nhập mỗi phiên bản 1 dòng, ví dụ:
-256GB | 8GB RAM | 34990000 | 39000000
-512GB | 8GB RAM | 39990000 | 44990000
-1TB | 8GB RAM | 46990000 | 49990000"
-        ></textarea>
+        <label>Phiên bản sản phẩm</label>
+        <p class="admin-help-text">
+          Nhập từng phiên bản bằng các ô bên dưới. Hệ thống sẽ tự lưu đúng định
+          dạng.
+        </p>
+
+        <!-- prettier-ignore -->
+        <textarea name="variants" id="variantsInput" hidden></textarea>
+
+        <div id="variantRows" class="dynamic-list"></div>
+
+        <button type="button" class="admin-mini-btn blue" id="addVariantBtn">
+          + Thêm phiên bản
+        </button>
       </div>
 
       <div class="admin-field admin-field-full">
-        <label>Danh sách màu sắc</label>
-        <textarea
-          name="colors"
-          rows="5"
-          required
-          placeholder="Nhập mỗi màu 1 dòng, ví dụ:
-Hồng | #f5a3d7 | /static/img/iphone-17e-pink.jpg
-Đen | #000000 | /static/img/iphone-17e-black.jpg
-Trắng | #ffffff | /static/img/iphone-17e-white.jpg"
-        ></textarea>
+        <label>Màu sắc & hình ảnh</label>
+        <p class="admin-help-text">
+          Mỗi màu có ảnh chính riêng. Ảnh gallery nhập mỗi link một dòng.
+        </p>
+
+        <!-- prettier-ignore -->
+        <textarea name="colors" id="colorsInput" hidden></textarea>
+
+        <div id="colorRows" class="dynamic-list"></div>
+
+        <button type="button" class="admin-mini-btn blue" id="addColorBtn">
+          + Thêm màu
+        </button>
       </div>
     </div>
 
@@ -79,9 +93,10 @@ Trắng | #ffffff | /static/img/iphone-17e-white.jpg"
 
     <div class="admin-form-actions">
       <button type="submit" class="admin-btn blue">Lưu sản phẩm</button>
-
-      <a href="/admin/products" class="admin-btn gray"> Hủy </a>
+      <a href="/admin/products" class="admin-btn gray">Hủy</a>
     </div>
   </form>
 </div>
+
+<script src="{{ url_for('static', filename='js/admin_product_form.js') }}"></script>
 {% endblock %}

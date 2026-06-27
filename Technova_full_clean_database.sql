@@ -1341,3 +1341,54 @@ GO
 SELECT id, name
 FROM products
 WHERE id = 1;
+
+USE Technova;
+GO
+
+SELECT TOP 10 *
+FROM products
+ORDER BY id DESC;
+
+
+USE Technova;
+GO
+
+ALTER TABLE product_storages
+ADD old_price_text NVARCHAR(50) NULL,
+    old_price_number BIGINT NULL,
+    discount NVARCHAR(20) NULL;
+GO
+
+USE Technova;
+GO
+
+SELECT COLUMN_NAME
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'product_storages';
+
+USE Technova;
+GO
+
+UPDATE s
+SET 
+    s.old_price_text = p.old_price_text,
+    s.old_price_number = p.old_price_number,
+    s.discount = p.discount
+FROM product_storages s
+JOIN products p ON s.product_id = p.id
+WHERE s.display_order = 1
+  AND p.old_price_number IS NOT NULL
+  AND s.old_price_number IS NULL;
+GO
+
+SELECT 
+    p.id,
+    p.name,
+    s.storage,
+    s.ram,
+    s.price_number,
+    s.old_price_number,
+    s.discount
+FROM products p
+JOIN product_storages s ON p.id = s.product_id
+ORDER BY p.id, s.display_order;

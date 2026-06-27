@@ -407,3 +407,102 @@
   gap: 16px;
   margin-top: 28px;
 }
+/* Dynamic admin product form */
+.admin-help-text {
+  margin: -4px 0 14px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.dynamic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.dynamic-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  gap: 14px;
+  align-items: end;
+  padding: 18px;
+  border: 1px solid #dbeafe;
+  background: #f8fbff;
+  border-radius: 16px;
+}
+
+.dynamic-row label,
+.gallery-box label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 7px;
+  color: #1e293b;
+}
+
+.dynamic-row input,
+.gallery-box textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  font-family: "Be Vietnam Pro", Arial, sans-serif;
+}
+
+.dynamic-row input:focus,
+.gallery-box textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.dynamic-color-card {
+  padding: 18px;
+  border: 1px solid #dbeafe;
+  background: #f8fbff;
+  border-radius: 18px;
+}
+
+.color-main-row {
+  padding: 0;
+  border: none;
+  background: transparent;
+  grid-template-columns: 1fr 1fr 2fr auto;
+}
+
+.gallery-box {
+  margin-top: 14px;
+}
+
+.admin-mini-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.admin-mini-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.admin-mini-btn.blue {
+  background: #2563eb;
+  color: white;
+}
+
+.admin-mini-btn.red {
+  background: #ef4444;
+  color: white;
+}
+
+@media (max-width: 900px) {
+  .dynamic-row,
+  .color-main-row {
+    grid-template-columns: 1fr;
+  }
+}
