@@ -32,136 +32,146 @@ block extra_head %}
             <p>🔁 1 đổi 1 trong 60 ngày</p>
           </div>
         </div>
+        <div class="technical-image-card">
+          <img alt="" class="technical-image" src="" />
+        </div>
       </section>
-      <section class="detail-right">
-        <div class="detail-header">
-          <div class="title-row">
-            <h1 class="detail-name"></h1>
-            <span class="detail-sold"></span>
-          </div>
-          <p class="detail-rating"></p>
-          <p class="detail-price"></p>
-        </div>
-        <div class="option-group">
-          <h3>Phiên bản</h3>
-          <div class="option-list">
-            <button class="active">256 GB</button>
-            <button>512 GB</button>
-            <button>1 TB</button>
-            <button>2 TB</button>
-          </div>
-        </div>
-        <div class="option-group">
-          <h3>Màu sắc</h3>
-          <div class="color-options">
-            <button class="active">
-              <span></span>
-              Cam vũ trụ
-            </button>
-            <button>
-              <span></span>
-              Bạc
-            </button>
-            <button>
-              <span></span>
-              Xanh đậm
-            </button>
-          </div>
-        </div>
-        <div class="highlight-specs">
-          <h3>Thông số nổi bật</h3>
-          <div class="spec-grid">
-            <div>
-              <span>Kích thước màn hình</span>
-              <strong class="highlight-screen-size">Đang cập nhật</strong>
+      <section class="detail-right-column">
+        <div class="detail-right">
+          <div class="detail-header">
+            <div class="title-row">
+              <h1 class="detail-name"></h1>
+              <span class="detail-sold"></span>
             </div>
+            <p class="detail-rating"></p>
+            <p class="detail-price"></p>
+          </div>
 
-            <div>
-              <span>CPU</span>
-              <strong class="highlight-chipset">Đang cập nhật</strong>
+          <div class="option-group">
+            <h3>Phiên bản</h3>
+            <div class="option-list">
+              <button class="active">256 GB</button>
+              <button>512 GB</button>
+              <button>1 TB</button>
+              <button>2 TB</button>
             </div>
           </div>
-        </div>
-        {% if session.get("role") != "admin" %}
-        <div class="quantity-cart">
-          <div class="quantity-box">
-            <button type="button" class="qty-minus">-</button>
-            <span class="qty-number">1</span>
-            <button type="button" class="qty-plus">+</button>
+
+          <div class="option-group">
+            <h3>Màu sắc</h3>
+            <div class="color-options">
+              <button class="active">
+                <span></span>
+                Cam vũ trụ
+              </button>
+              <button>
+                <span></span>
+                Bạc
+              </button>
+              <button>
+                <span></span>
+                Xanh đậm
+              </button>
+            </div>
           </div>
 
-          <button type="button" class="add-cart-btn">Thêm vào giỏ hàng</button>
+          <div class="highlight-specs">
+            <h3>Thông số nổi bật</h3>
+            <div class="spec-grid">
+              <div>
+                <span>Kích thước màn hình</span>
+                <strong class="highlight-screen-size">Đang cập nhật</strong>
+              </div>
+
+              <div>
+                <span>CPU</span>
+                <strong class="highlight-chipset">Đang cập nhật</strong>
+              </div>
+            </div>
+          </div>
+
+          {% if session.get("role") != "admin" %}
+          <div class="quantity-cart">
+            <div class="quantity-box">
+              <button type="button" class="qty-minus">-</button>
+              <span class="qty-number">1</span>
+              <button type="button" class="qty-plus">+</button>
+            </div>
+
+            <button type="button" class="add-cart-btn">
+              Thêm vào giỏ hàng
+            </button>
+          </div>
+
+          <button type="button" class="buy-now-btn">Mua ngay</button>
+
+          {% else %}
+          <div
+            style="
+              margin-top: 24px;
+              padding: 18px;
+              border: 1px solid #bfdbfe;
+              background: #eff6ff;
+              color: #1e40af;
+              border-radius: 12px;
+              font-weight: 700;
+            "
+          >
+            Tài khoản admin chỉ dùng để quản trị, không được mua hàng.
+          </div>
+
+          <a
+            href="/admin"
+            style="
+              display: block;
+              margin-top: 14px;
+              text-align: center;
+              padding: 14px;
+              background: #2563eb;
+              color: white;
+              border-radius: 12px;
+              text-decoration: none;
+              font-weight: 700;
+            "
+          >
+            Về trang quản trị
+          </a>
+          {% endif %}
         </div>
 
-        <button type="button" class="buy-now-btn">Mua ngay</button>
-        {% else %}
-        <div
-          style="
-            margin-top: 24px;
-            padding: 18px;
-            border: 1px solid #bfdbfe;
-            background: #eff6ff;
-            color: #1e40af;
-            border-radius: 12px;
-            font-weight: 700;
-          "
-        >
-          Tài khoản admin chỉ dùng để quản trị, không được mua hàng.
-        </div>
+        <aside class="detail-promo-policy">
+          <div class="special-promo">
+            <h3>Khuyến mãi đặc biệt</h3>
+            <p>
+              - Ưu đãi độc quyền cho thành viên Technova với nhiều quà tặng công
+              nghệ hấp dẫn.
+            </p>
+            <p>
+              - Miễn phí giao hàng toàn quốc và hỗ trợ bảo hành chính hãng lên
+              đến 24 tháng.
+            </p>
+          </div>
 
-        <a
-          href="/admin"
-          style="
-            display: block;
-            margin-top: 14px;
-            text-align: center;
-            padding: 14px;
-            background: #2563eb;
-            color: white;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 700;
-          "
-        >
-          Về trang quản trị
-        </a>
-        {% endif %}
+          <div class="support-policy">
+            <h3>Chính sách hỗ trợ</h3>
+            <p>
+              🔁 Hỗ trợ đổi trả nhanh chóng trong vòng 30 ngày nếu phát sinh lỗi
+              kỹ thuật.
+            </p>
+            <p>
+              🛡️ Bảo hành chính hãng toàn quốc với quy trình kiểm tra và tiếp
+              nhận minh bạch.
+            </p>
+            <p>
+              🏅 Cam kết sản phẩm chính hãng 100% cùng đầy đủ hóa đơn và bảo
+              hành điện tử.
+            </p>
+            <p>☎ Hotline: 1900 3252</p>
+          </div>
+        </aside>
       </section>
     </section>
-    <section class="detail-extra">
-      <div class="technical-image-card">
-        <img alt="" class="technical-image" src="" />
-      </div>
-      <aside class="detail-promo-policy">
-        <div class="special-promo">
-          <h3>Khuyến mãi đặc biệt</h3>
-          <p>
-            - Ưu đãi độc quyền cho thành viên Technova với nhiều quà tặng công
-            nghệ hấp dẫn.
-          </p>
-          <p>
-            - Miễn phí giao hàng toàn quốc và hỗ trợ bảo hành chính hãng lên đến
-            24 tháng.
-          </p>
-        </div>
-        <div class="support-policy">
-          <h3>Chính sách hỗ trợ</h3>
-          <p>
-            🔁 Hỗ trợ đổi trả nhanh chóng trong vòng 30 ngày nếu phát sinh lỗi
-            kỹ thuật.
-          </p>
-          <p>
-            🛡️ Bảo hành chính hãng toàn quốc với quy trình kiểm tra và tiếp nhận
-            minh bạch.
-          </p>
-          <p>
-            🏅 Cam kết sản phẩm chính hãng 100% cùng đầy đủ hóa đơn và bảo hành
-            điện tử.
-          </p>
-          <p>☎ Hotline: 1900 3252</p>
-        </div>
-      </aside>
-    </section>
+
     <section class="product-spec-section">
       <div class="spec-header">
         <h2>Thông số sản phẩm</h2>
