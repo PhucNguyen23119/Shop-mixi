@@ -12,7 +12,7 @@ app.secret_key = "technova_secret_key"
 def get_conn():
     return pyodbc.connect(
         "DRIVER={ODBC Driver 17 for SQL Server};"
-        r"SERVER=DESKTOP-7A2RI7P\SQLEXPRESS;"
+        r"SERVER=LAPTOP-QJFTOCK4;"
         "DATABASE=Technova;"
         "Trusted_Connection=yes;"
     )
@@ -41,7 +41,7 @@ def format_vnd(price_number):
 # Nếu bạn đã gộp tất cả bảng vào cùng database, đổi product_database thành "Technova1".
 # =========================
 PRODUCT_DB_CONFIG = {
-    "server": r"DESKTOP-7A2RI7P\SQLEXPRESS",
+    "server": r"LAPTOP-QJFTOCK4",
     "database": "Technova",
     "driver": "{ODBC Driver 17 for SQL Server}"
 }
